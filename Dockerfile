@@ -30,12 +30,9 @@ RUN apt-get install -y \
     export PATH="/root/.cargo/bin:$PATH" && \
     git clone https://github.com/shadow/shadow.git &&\
     cd shadow &&\
-    ./setup build --clean --test && \
+    ./setup build --clean --test --prefix=/usr/local && \
     ./setup install && \
-    cd ../ &&\
-    echo 'export PATH="${PATH}:/home/${USER}/.local/bin"' >> ~/.bashrc && . ~/.bashrc
-
-    
+    cd ../
 
 # Install tornettools from PyPI
 RUN git clone https://github.com/shadow/tornettools.git && \
