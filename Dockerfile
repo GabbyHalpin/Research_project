@@ -34,6 +34,15 @@ RUN apt-get install -y \
     ./setup install && \
     cd ../
 
+# Download TGen for traffic generation
+RUN apt-get install cmake libglib2.0-dev libigraph-dev -y &&\
+    git clone https://github.com/shadow/tgen.git && \
+    cd tgen && \
+    mkdir build && cd build && \
+    cmake .. -DCMAKE_INSTALL_PREFIX=/usr/local && \
+    make && \
+    make install
+
 # Install tornettools from PyPI
 RUN git clone https://github.com/shadow/tornettools.git && \
     cd tornettools &&\
@@ -46,7 +55,7 @@ RUN wget https://collector.torproject.org/archive/relay-descriptors/consensuses/
     wget https://collector.torproject.org/archive/relay-descriptors/server-descriptors/server-descriptors-2025-04.tar.xz &&\
     wget https://metrics.torproject.org/userstats-relay-country.csv &&\
     wget https://collector.torproject.org/archive/onionperf/onionperf-2025-04.tar.xz &&\
-    wget -O bandwidth-2023-04.csv "https://metrics.torproject.org/bandwidth.csv?start=2025-04-01&end=2025-04-30" &&\
+    wget -O bandwidth-2025-04.csv "https://metrics.torproject.org/bandwidth.csv?start=2025-04-01&end=2025-04-30" &&\
     tar xaf consensuses-2025-04.tar.xz &&\
     tar xaf server-descriptors-2025-04.tar.xz &&\
     tar xaf onionperf-2025-04.tar.xz
