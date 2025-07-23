@@ -43,6 +43,15 @@ RUN apt-get install cmake libglib2.0-dev libigraph-dev -y &&\
     make && \
     make install
 
+# Download OnionTrace for 
+RUN apt-get install cmake libglib2.0-dev libigraph-dev -y &&\
+    git clone https://github.com/shadow/oniontrace.git && \
+    cd oniontrace && \
+    mkdir build && cd build && \
+    cmake .. -DCMAKE_INSTALL_PREFIX=/usr/local && \
+    make && \
+    make install
+
 # Install tornettools from PyPI
 RUN git clone https://github.com/shadow/tornettools.git && \
     cd tornettools &&\
@@ -62,15 +71,25 @@ RUN wget https://collector.torproject.org/archive/relay-descriptors/consensuses/
     
 RUN git clone https://github.com/tmodel-ccs2018/tmodel-ccs2018.github.io.git
 
-RUN apt-get install openssl libssl-dev libevent-dev build-essential automake zlib1g zlib1g-dev  -y &&\
-    git clone https://git.torproject.org/tor.git &&\
-    cd tor &&\
-    ./autogen.sh &&\
-    ./configure --disable-asciidoc --disable-unittests --disable-manpage --disable-html-manual &&\
-    make -j$(nproc) &&\
-    cd .. &&\
-    apt-get install faketime dstat procps xz-utils &&\
+ENV DEBIAN_FRONTEND=noninteractive
+ENV TZ=UTC
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone && \
+    apt-get update && \
+    apt-get install -y autotools-dev autoconf automake libtool && \
+    apt-get install -y openssl libssl-dev libevent-dev build-essential zlib1g zlib1g-dev && \
+    git clone https://git.torproject.org/tor.git && \
+    cd tor && \
+    ./autogen.sh && \
+    ./configure --prefix=/usr/local --disable-asciidoc --disable-unittests --disable-manpage --disable-html-manual && \
+    make -j$(nproc) && \
+    make install &&\
+    apt-get install faketime dstat procps xz-utils -y &&\
     export PATH=${PATH}:`pwd`/tor/src/core/or:`pwd`/tor/src/app:`pwd`/tor/src/tools
+
+COPY shadow.yaml .
+COPY tgen.client.graphml.xml .
+COPY tgen.server.graphml.xml .
+
 
 # 6) Default entrypoint
 ENTRYPOINT ["bash"]
