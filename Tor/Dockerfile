@@ -138,40 +138,6 @@ RUN wget https://dl.google.com/go/go1.24.5.linux-amd64.tar.gz \
 # 15) Upgrade networkx in user‐space
 RUN python3 -m pip install --user --upgrade networkx
 
-# 16) Build & install Arti (and arti-extra) into ~/.local/bin
-RUN git clone https://gitlab.torproject.org/tpo/core/arti.git arti-src \
- && cd arti-src \
-   # debug build for Shadow
- && cargo build --locked --verbose \
-      --target x86_64-unknown-linux-gnu \
-      -p arti -p tor-circmgr \
-      --bin arti \
-      --features full,restricted-discovery,arti-client/keymgr,onion-service-service,vanguards,ctor-keystore \
- && mkdir -p ${HOME}/.local/bin \
- && cp target/x86_64-unknown-linux-gnu/debug/arti target/x86_64-unknown-linux-gnu/debug/arti-extra \
- && cp target/x86_64-unknown-linux-gnu/debug/arti-extra ${HOME}/.local/bin/ \
-   # vanilla debug build
- && cargo build --locked --verbose --target x86_64-unknown-linux-gnu -p arti \
- && cp target/x86_64-unknown-linux-gnu/debug/arti ${HOME}/.local/bin/arti \
-   # release build
- && cargo build -p arti --release \
- && cp target/release/arti ${HOME}/.local/bin/arti-release \
- && cd .. \
- # && rm -rf arti-src
-# # 17) Copy your simulation files & generate host keys
-# COPY --chown=${USER}:${USER} shadow_expanded.yaml \
-#                            tgen.client.graphml.xml \
-#                            tgen.torclient.graphml.xml \
-#                            tgen.server.graphml.xml  ./
-
-WORKDIR /home/${USER}/arti/tests/shadow/shadow.data.template/hosts
-COPY --chown=${USER}:${USER} generate_arti.py .
-RUN ls -la ../../
-
-ENV PATH=${HOME}/.local/bin:$PATH
-RUN python3 -m pip install --user pynacl \
- && python3 generate_arti.py
-
 # 18) Drop into bash in your user’s home
 WORKDIR /home/${USER}
 ENTRYPOINT ["bash"]
