@@ -62,38 +62,30 @@ RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs \
 SHELL ["/bin/bash", "-lc"]
 
 # 7) Build & install Shadow into ~/.local
-RUN git clone https://github.com/shadow/shadow.git shadow-src \
- && cd shadow-src \
+RUN git clone https://github.com/shadow/shadow.git shadow \
+ && cd shadow \
  && ./setup build --clean --test --prefix=${HOME}/.local \
- && ./setup install \
- && cd .. \
- && rm -rf shadow-src
+ && ./setup install
 
 # 8) Build & install TGen into ~/.local
-RUN git clone https://github.com/shadow/tgen.git tgen-src \
- && mkdir -p tgen-src/build \
- && cd tgen-src/build \
+RUN git clone https://github.com/shadow/tgen.git tgen \
+ && mkdir -p tgen/build \
+ && cd tgen/build \
  && cmake .. -DCMAKE_INSTALL_PREFIX=${HOME}/.local \
- && make install \
- && cd ../.. \
- && rm -rf tgen-src
+ && make install 
 
 # 9) Build & install OnionTrace into ~/.local
-RUN git clone https://github.com/shadow/oniontrace.git oniontrace-src \
- && mkdir -p oniontrace-src/build \
- && cd oniontrace-src/build \
+RUN git clone https://github.com/shadow/oniontrace.git oniontrace \
+ && mkdir -p oniontrace/build \
+ && cd oniontrace/build \
  && cmake .. -DCMAKE_INSTALL_PREFIX=${HOME}/.local \
- && make install \
- && cd ../.. \
- && rm -rf oniontrace-src
+ && make install
 
 # 10) Install tornettools into ~/.local
-RUN git clone https://github.com/shadow/tornettools.git tornettools-src \
- && cd tornettools-src \
+RUN git clone https://github.com/shadow/tornettools.git tornettools \
+ && cd tornettools \
  && python3 -m pip install --user -r requirements.txt \
- && python3 -m pip install --user . \
- && cd .. \
- && rm -rf tornettools-src
+ && python3 -m pip install --user . 
 
 # 11) (Optionally) Fetch Tor network data under $HOME
 # fetch data for the tornettools network 
@@ -110,8 +102,8 @@ RUN wget https://collector.torproject.org/archive/relay-descriptors/consensuses/
 RUN git clone https://github.com/tmodel-ccs2018/tmodel-ccs2018.github.io.git
 
 # 13) Build & install Tor from source into ~/.local
-RUN git clone https://git.torproject.org/tor.git tor-src \
- && cd tor-src \
+RUN git clone https://git.torproject.org/tor.git tor \
+ && cd tor \
  && ./autogen.sh \
  && ./configure \
       --prefix=${HOME}/.local \
@@ -120,20 +112,16 @@ RUN git clone https://git.torproject.org/tor.git tor-src \
       --disable-manpage \
       --disable-html-manual \
  && make -j"$(nproc)" \
- && make install \
- && cd .. \
- && rm -rf tor-src
+ && make install
 
 # 14) Build obfs4proxy into ~/.local/bin
 RUN wget https://dl.google.com/go/go1.24.5.linux-amd64.tar.gz \
  && tar -C ${HOME} -xzf go1.24.5.linux-amd64.tar.gz \
- && git clone https://gitlab.com/yawning/obfs4.git obfs4-src \
- && cd obfs4-src \
+ && git clone https://gitlab.com/yawning/obfs4.git obfs4 \
+ && cd obfs4 \
  && ${HOME}/go/bin/go build -o obfs4proxy/obfs4proxy ./obfs4proxy \
  && mkdir -p ${HOME}/.local/bin \
- && cp obfs4proxy/obfs4proxy ${HOME}/.local/bin/ \
- && cd .. \
- && rm -rf obfs4-src go1.24.5.linux-amd64.tar.gz
+ && cp obfs4proxy/obfs4proxy ${HOME}/.local/bin/
 
 # 15) Upgrade networkx in user‐space
 RUN python3 -m pip install --user --upgrade networkx
