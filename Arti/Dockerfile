@@ -147,7 +147,8 @@ RUN git clone https://gitlab.torproject.org/tpo/core/arti.git arti \
 
 WORKDIR /home/${USER}/arti/tests/shadow/shadow.data.template/hosts
 COPY --chown=${USER}:${USER} generate_arti.py .
-RUN ls -la ../../
+
+RUN ls -la ../../conf
 
 ENV PATH=${HOME}/.local/bin:$PATH
 RUN python3 -m pip install --user pynacl \
