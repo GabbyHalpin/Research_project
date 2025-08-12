@@ -15,6 +15,12 @@ RUN apt-get update \
      python3 \
      python3-pip \
      python3-networkx \
+     python3-lxml \
+     python3-numpy \
+     python3-scipy \
+     python3-pandas \
+     python3-yaml \
+     python3-requests \
      libglib2.0-0 \
      libglib2.0-dev \
      libevent-dev \
@@ -38,6 +44,8 @@ RUN apt-get update \
      faketime \
      dstat \
      procps \
+     tcpdump \
+     tshark \
  && rm -rf /var/lib/apt/lists/*
 
 # 3) Create a non-root user and home dir
@@ -53,6 +61,17 @@ ENV PATH=${HOME}/.local/bin:${HOME}/.cargo/bin:/usr/local/bin:${PATH}
 
 # 5) Upgrade pip and install Python packages into ~/.local
 RUN python3 -m pip install --upgrade pip --user
+
+# Install additional Python packages for WF research
+RUN python3 -m pip install --user \
+    scapy \
+    stem \
+    matplotlib \
+    seaborn \
+    scikit-learn \
+    torch \
+    tensorflow \
+    jupyter
 
 # 6) Install Rust toolchain into ~/.cargo
 RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs \
@@ -87,8 +106,7 @@ RUN git clone https://github.com/shadow/tornettools.git tornettools \
  && python3 -m pip install --user -r requirements.txt \
  && python3 -m pip install --user . 
 
-# 11) (Optionally) Fetch Tor network data under $HOME
-# fetch data for the tornettools network 
+# 11) Fetch Tor network data under $HOME
 RUN wget https://collector.torproject.org/archive/relay-descriptors/consensuses/consensuses-2025-04.tar.xz &&\
     wget https://collector.torproject.org/archive/relay-descriptors/server-descriptors/server-descriptors-2025-04.tar.xz &&\ 
     wget https://metrics.torproject.org/userstats-relay-country.csv &&\ 
@@ -126,6 +144,72 @@ RUN wget https://dl.google.com/go/go1.24.5.linux-amd64.tar.gz \
 # 15) Upgrade networkx in user‐space
 RUN python3 -m pip install --user --upgrade networkx
 
-# 18) Drop into bash in your user’s home
+# 16) Stage the network using imported data
+RUN tornettools stage \
+    consensuses-2025-04 \
+    server-descriptors-2025-04 \
+    userstats-relay-country.csv \
+    tmodel-ccs2018.github.io \
+    --onionperf_data_path onionperf-2025-04 \
+    --bandwidth_data_path bandwidth-2025-04.csv \
+    --geoip_path tor/src/config/geoip
+
+# 17) Generate base network at 5% scale
+RUN tornettools generate \
+    relayinfo_staging_2025-04-01--2025-04-30.json \
+    userinfo_staging_2025-04-01--2025-04-30.json \
+    networkinfo_staging.gml \
+    tmodel-ccs2018.github.io \
+    --network_scale 0.05 \
+    --prefix tornet-0.05
+
+# # 18) Generate network variations for robustness testing (following simulation paper)
+# RUN for seed in 1 2 3; do \
+#         for load in 1.5 2.0 2.5; do \
+#             echo "Generating network variant: seed=${seed}, load=${load}"; \
+#             tornettools generate \
+#                 relayinfo_staging_2025-04-01--2025-04-30.json \
+#                 userinfo_staging_2025-04-01--2025-04-30.json \
+#                 networkinfo_staging.gml \
+#                 tmodel-ccs2018.github.io \
+#                 --network_scale 0.05 \
+#                 --load_scale ${load} \
+#                 --seed ${seed} \
+#                 --prefix tornet-0.05-seed${seed}-load${load}; \
+#         done; \
+#     done
+
+# 19) Copy user scripts and data
+COPY --chown=${USER}:${USER} urls.txt .
+COPY --chown=${USER}:${USER} convert_config.py .
+COPY --chown=${USER}:${USER} data_processor.py .
+COPY --chown=${USER}:${USER} process_wf_data.sh .
+COPY --chown=${USER}:${USER} run_simulation.sh .
+#COPY --chown=${USER}:${USER} run_all_simulations.sh .
+
+# # 20) Run configuration conversion for all generated networks
+# RUN echo "Converting base network configuration..." && \
+#     python3 convert_config.py tornet-0.05 urls.txt -v
+
+# # Convert all network variations
+# RUN for seed in 1 2 3; do \
+#         for load in 1.5 2.0 2.5; do \
+#             network_dir="tornet-0.05-seed${seed}-load${load}"; \
+#             echo "Converting network variant: ${network_dir}"; \
+#             python3 convert_config.py ${network_dir} urls.txt; \
+#         done; \
+#     done
+
+# RUN echo "=== WEBSITE FINGERPRINTING RESEARCH SETUP COMPLETE ===" && \
+#     echo "Generated networks:" && \
+#     ls -d tornet-* && \
+#     echo "" && \
+#     echo "✅ All configurations modified for WF research" && \
+#     echo "✅ URLs processed and integrated" && \
+#     echo "✅ Helper scripts created" && \
+#     echo "" && \
+#     echo "Read WF_RESEARCH_SETUP.md for next steps" && \
+#     echo "Ready for simulation and data collection!"
+
 WORKDIR /home/${USER}
 ENTRYPOINT ["bash"]
