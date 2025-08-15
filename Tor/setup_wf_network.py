@@ -596,7 +596,7 @@ class ImprovedWFConfigConverter:
                     
                 # wget2 process following repository format
                 wget2_args = (
-                    '--page-requisites --max-threads=30 --timeout=30 --tries=1 '
+                    '--page-requisites --max-threads=2 --timeout=30 --tries=1 '
                     '--no-retry-on-http-error --no-tcp-fastopen --delete-after --quiet '
                     '--user-agent="Mozilla/5.0 (Windows NT 10.0; rv:102.0) Gecko/20100101 Firefox/102.0" '
                     '--no-robots --filter-urls --reject-regex=/w/|\\.js$ '
@@ -614,7 +614,7 @@ class ImprovedWFConfigConverter:
                         'LD_LIBRARY_PATH': '/opt/lib'
                     },
                     'path': f'{os.path.expanduser("~")}/.local/bin/wget2',
-                    'start_time': start_time + j * 60  # 1 minute apart
+                    'start_time': start_time + j * 180  # 1 minute apart
                 }
                 
                 config['hosts'][monitor_name]['processes'].append(wget2_process)
@@ -670,7 +670,7 @@ SignalNodes 6C4853E10E2EB0C5A79DF8367CC1DC6E60254A70,ECDA5F841EDCA242443693BDF0A
         success_count = 0
         
         # Create shadow.data.template directory structure
-        template_dir = self.network_dir / 'shadow.data.template'
+        template_dir = self.network_dir / 'shadow.data.template/hosts'
         template_dir.mkdir(exist_ok=True, parents=True)
         
         # torrc-defaults content
@@ -680,14 +680,7 @@ SignalNodes 6C4853E10E2EB0C5A79DF8367CC1DC6E60254A70,ECDA5F841EDCA242443693BDF0A
 """
         
         # newnym.py content
-        newnym_content = """# from stem import Signal
-# from stem.control import Controller
-
-# with Controller.from_port(port = 9051) as c:
-#     c.authenticate()
-#     c.signal(Signal.NEWNYM)
-
-import socket
+        newnym_content = """import socket
 
 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
     print("Connecting to 127.0.0.1:9051")
@@ -695,7 +688,7 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
     print("Done connect")
 
     print("Sending AUTHENTICATE")
-    s.sendall(b"AUTHENTICATE\\r\\n")
+    s.sendall(b"AUTHENTICATE\r\n")
     print("Done AUTHENTICATE")
 
     print("Receiving AUTHENTICATE response")
@@ -703,7 +696,7 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
     print(f"Received {data!r}")
 
     print("Sending SIGNAL NEWNYM")
-    s.sendall(b"SIGNAL NEWNYM\\r\\n")
+    s.sendall(b"SIGNAL NEWNYM\r\n")
     print("Done SIGNAL NEWNYM")
 
     print("Receiving SIGNAL NEWNYM response")
@@ -712,28 +705,6 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
 
     print("All done, bye!")
 """
-        
-        # Create crawler0 directory and files
-        crawler_dir = template_dir / 'crawler0'
-        crawler_dir.mkdir(exist_ok=True, parents=True)
-        
-        try:
-            with open(crawler_dir / 'torrc-defaults', 'w') as f:
-                f.write(torrc_defaults_content)
-            self.log(f"✅ Created crawler0/torrc-defaults")
-            success_count += 1
-        except Exception as e:
-            self.log(f"Warning: Could not create crawler0/torrc-defaults: {e}")
-        
-        try:
-            with open(crawler_dir / 'newnym.py', 'w') as f:
-                f.write(newnym_content)
-            # Make executable
-            (crawler_dir / 'newnym.py').chmod(0o755)
-            self.log(f"✅ Created crawler0/newnym.py")
-            success_count += 1
-        except Exception as e:
-            self.log(f"Warning: Could not create crawler0/newnym.py: {e}")
         
         # Create monitor0 directory and files
         monitor_dir = template_dir / 'monitor0'
@@ -799,7 +770,7 @@ print(f'Found environment ZIMPORT={port}')
 print('Starting zimply server now!')
 
 from zimply import ZIMServer
-ZIMServer(f"{root}/wikipedia_en_all_maxi.zim",
+ZIMServer(f"{root}/wikipedia_en_top.zim",
      index_file=f"{root}/index.idx",
      template=f"{root}/template.html",
      ip_address=ip,
@@ -910,7 +881,6 @@ ZIMServer(f"{root}/wikipedia_en_all_maxi.zim",
                 'conf_directory': str(self.network_dir / 'conf'),
                 'template_directory': str(self.network_dir / 'shadow.data.template'),
                 'tor_crawler_torrc': str(self.network_dir / 'conf' / 'tor.crawler.torrc'),
-                'crawler_configs': 'shadow.data.template/crawler0/',
                 'monitor_configs': 'shadow.data.template/monitor*/',
                 'zimserver_configs': 'shadow.data.template/zimserver0/',
                 'newnym_scripts': 'newnym.py files for circuit management',

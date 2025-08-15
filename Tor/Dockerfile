@@ -216,14 +216,14 @@ RUN pip3 install --user zimply
 RUN export PATH=${PATH}:`pwd`/tor/src/core/or:`pwd`/tor/src/app:`pwd`/tor/src/tools
 
 # (Optionally) Fetch Tor network data under $HOME
-RUN wget https://collector.torproject.org/archive/relay-descriptors/consensuses/consensuses-2025-04.tar.xz &&\
-    wget https://collector.torproject.org/archive/relay-descriptors/server-descriptors/server-descriptors-2025-04.tar.xz &&\ 
+RUN wget https://collector.torproject.org/archive/relay-descriptors/consensuses/consensuses-2025-07.tar.xz &&\
+    wget https://collector.torproject.org/archive/relay-descriptors/server-descriptors/server-descriptors-2025-07.tar.xz &&\ 
     wget https://metrics.torproject.org/userstats-relay-country.csv &&\ 
-    wget https://collector.torproject.org/archive/onionperf/onionperf-2025-04.tar.xz &&\ 
-    wget -O bandwidth-2025-04.csv "https://metrics.torproject.org/bandwidth.csv?start=2025-04-01&end=2025-04-30" &&\ 
-    tar xaf consensuses-2025-04.tar.xz &&\ 
-    tar xaf server-descriptors-2025-04.tar.xz &&\ 
-    tar xaf onionperf-2025-04.tar.xz
+    wget https://collector.torproject.org/archive/onionperf/onionperf-2025-07.tar.xz &&\ 
+    wget -O bandwidth-2025-07.csv "https://metrics.torproject.org/bandwidth.csv?start=2025-07-01&end=2025-07-31" &&\ 
+    tar xaf consensuses-2025-07.tar.xz &&\ 
+    tar xaf server-descriptors-2025-07.tar.xz &&\ 
+    tar xaf onionperf-2025-07.tar.xz
 
 # Clone t-model repo
 RUN git clone https://github.com/tmodel-ccs2018/tmodel-ccs2018.github.io.git
@@ -238,6 +238,7 @@ COPY --chown=${USER}:${USER} run_wf_simulation.sh .
 COPY --chown=${USER}:${USER} setup_wf_network.py .
 COPY --chown=${USER}:${USER} wf_classifiers.py .
 
+
 # Verify installations work
 RUN which shadow || echo "Shadow not found"
 RUN which tor || echo "Tor not found"
@@ -245,14 +246,19 @@ RUN which tgen || echo "TGen not found"
 RUN which oniontrace || echo "OnionTrace not found"
 RUN python3 -c "import tornettools; print('tornettools imported successfully')" || echo "tornettools import failed"
 
+#Download wikidata
+RUN mkdir -p wikidata && \
+    cd wikidata && \
+    wget -O wikipedia_en_top.zim \
+    "https://download.kiwix.org/zim/wikipedia/wikipedia_en_100_maxi_2025-07.zim"
 
 RUN tornettools stage \
-    consensuses-2025-04 \
-    server-descriptors-2025-04 \
+    consensuses-2025-07 \
+    server-descriptors-2025-07 \
     userstats-relay-country.csv \
     tmodel-ccs2018.github.io \
-    --onionperf_data_path onionperf-2025-04 \
-    --bandwidth_data_path bandwidth-2025-04.csv \
+    --onionperf_data_path onionperf-2025-07 \
+    --bandwidth_data_path bandwidth-2025-07.csv \
     --geoip_path tor/src/config/geoip
 
 WORKDIR /home/${USER}
