@@ -1,0 +1,6438 @@
+general:
+  bootstrap_end_time: 300
+  stop_time: 3600
+  progress: true
+  template_directory: shadow.data.template
+network:
+  use_shortest_path: false
+  graph:
+    type: gml
+    file:
+      path: /mnt/tornet-0.01/conf/atlas_v201801.shadow_v2.gml.xz
+      compression: xz
+hosts:
+  4uthority1:
+    network_node_id: 49
+    ip_addr: 100.0.0.1
+    bandwidth_down: 1000000 kilobit
+    bandwidth_up: 1000000 kilobit
+    processes:
+    - path: ~/.local/bin/tor
+      args: --Address 4uthority1 --Nickname 4uthority1 --defaults-torrc torrc-defaults
+        -f torrc
+      start_time: 1
+      expected_final_state: running
+    - path: ~/.local/bin/oniontrace
+      args: Mode=log TorControlPort=9051 LogLevel=info Events=BW,CIRC
+      start_time: 2
+      expected_final_state: running
+  4uthority2:
+    network_node_id: 327
+    ip_addr: 100.0.0.2
+    bandwidth_down: 1000000 kilobit
+    bandwidth_up: 1000000 kilobit
+    processes:
+    - path: ~/.local/bin/tor
+      args: --Address 4uthority2 --Nickname 4uthority2 --defaults-torrc torrc-defaults
+        -f torrc
+      start_time: 1
+      expected_final_state: running
+    - path: ~/.local/bin/oniontrace
+      args: Mode=log TorControlPort=9051 LogLevel=info Events=BW,CIRC
+      start_time: 2
+      expected_final_state: running
+  4uthority3:
+    network_node_id: 1410
+    ip_addr: 100.0.0.3
+    bandwidth_down: 1000000 kilobit
+    bandwidth_up: 1000000 kilobit
+    processes:
+    - path: ~/.local/bin/tor
+      args: --Address 4uthority3 --Nickname 4uthority3 --defaults-torrc torrc-defaults
+        -f torrc
+      start_time: 1
+      expected_final_state: running
+    - path: ~/.local/bin/oniontrace
+      args: Mode=log TorControlPort=9051 LogLevel=info Events=BW,CIRC
+      start_time: 2
+      expected_final_state: running
+  relay1exitguard:
+    network_node_id: 1601
+    ip_addr: 185.220.100.242
+    bandwidth_down: 521224 kilobit
+    bandwidth_up: 521224 kilobit
+    processes:
+    - path: ~/.local/bin/tor
+      args: --Address relay1exitguard --Nickname relay1exitguard --defaults-torrc
+        torrc-defaults -f torrc
+      start_time: 2
+      expected_final_state: running
+    - path: ~/.local/bin/oniontrace
+      args: Mode=log TorControlPort=9051 LogLevel=info Events=BW,CIRC
+      start_time: 3
+      expected_final_state: running
+  relay2exitguard:
+    network_node_id: 2024
+    ip_addr: 45.153.34.246
+    bandwidth_down: 240928 kilobit
+    bandwidth_up: 240928 kilobit
+    processes:
+    - path: ~/.local/bin/tor
+      args: --Address relay2exitguard --Nickname relay2exitguard --defaults-torrc
+        torrc-defaults -f torrc
+      start_time: 2
+      expected_final_state: running
+    - path: ~/.local/bin/oniontrace
+      args: Mode=log TorControlPort=9051 LogLevel=info Events=BW,CIRC
+      start_time: 3
+      expected_final_state: running
+  relay3exitguard:
+    network_node_id: 1601
+    ip_addr: 185.220.101.41
+    bandwidth_down: 285688 kilobit
+    bandwidth_up: 285688 kilobit
+    processes:
+    - path: ~/.local/bin/tor
+      args: --Address relay3exitguard --Nickname relay3exitguard --defaults-torrc
+        torrc-defaults -f torrc
+      start_time: 2
+      expected_final_state: running
+    - path: ~/.local/bin/oniontrace
+      args: Mode=log TorControlPort=9051 LogLevel=info Events=BW,CIRC
+      start_time: 3
+      expected_final_state: running
+  relay4exitguard:
+    network_node_id: 465
+    ip_addr: 93.123.109.116
+    bandwidth_down: 188016 kilobit
+    bandwidth_up: 188016 kilobit
+    processes:
+    - path: ~/.local/bin/tor
+      args: --Address relay4exitguard --Nickname relay4exitguard --defaults-torrc
+        torrc-defaults -f torrc
+      start_time: 2
+      expected_final_state: running
+    - path: ~/.local/bin/oniontrace
+      args: Mode=log TorControlPort=9051 LogLevel=info Events=BW,CIRC
+      start_time: 3
+      expected_final_state: running
+  relay5exitguard:
+    network_node_id: 1517
+    ip_addr: 178.20.55.16
+    bandwidth_down: 159960 kilobit
+    bandwidth_up: 159960 kilobit
+    processes:
+    - path: ~/.local/bin/tor
+      args: --Address relay5exitguard --Nickname relay5exitguard --defaults-torrc
+        torrc-defaults -f torrc
+      start_time: 2
+      expected_final_state: running
+    - path: ~/.local/bin/oniontrace
+      args: Mode=log TorControlPort=9051 LogLevel=info Events=BW,CIRC
+      start_time: 3
+      expected_final_state: running
+  relay6exitguard:
+    network_node_id: 1763
+    ip_addr: 45.141.215.21
+    bandwidth_down: 155344 kilobit
+    bandwidth_up: 155344 kilobit
+    processes:
+    - path: ~/.local/bin/tor
+      args: --Address relay6exitguard --Nickname relay6exitguard --defaults-torrc
+        torrc-defaults -f torrc
+      start_time: 2
+      expected_final_state: running
+    - path: ~/.local/bin/oniontrace
+      args: Mode=log TorControlPort=9051 LogLevel=info Events=BW,CIRC
+      start_time: 3
+      expected_final_state: running
+  relay7exitguard:
+    network_node_id: 1763
+    ip_addr: 45.80.158.167
+    bandwidth_down: 131600 kilobit
+    bandwidth_up: 131600 kilobit
+    processes:
+    - path: ~/.local/bin/tor
+      args: --Address relay7exitguard --Nickname relay7exitguard --defaults-torrc
+        torrc-defaults -f torrc
+      start_time: 2
+      expected_final_state: running
+    - path: ~/.local/bin/oniontrace
+      args: Mode=log TorControlPort=9051 LogLevel=info Events=BW,CIRC
+      start_time: 3
+      expected_final_state: running
+  relay8exitguard:
+    network_node_id: 1763
+    ip_addr: 45.80.158.27
+    bandwidth_down: 145848 kilobit
+    bandwidth_up: 145848 kilobit
+    processes:
+    - path: ~/.local/bin/tor
+      args: --Address relay8exitguard --Nickname relay8exitguard --defaults-torrc
+        torrc-defaults -f torrc
+      start_time: 2
+      expected_final_state: running
+    - path: ~/.local/bin/oniontrace
+      args: Mode=log TorControlPort=9051 LogLevel=info Events=BW,CIRC
+      start_time: 3
+      expected_final_state: running
+  relay9exitguard:
+    network_node_id: 2065
+    ip_addr: 77.48.28.239
+    bandwidth_down: 102800 kilobit
+    bandwidth_up: 102800 kilobit
+    processes:
+    - path: ~/.local/bin/tor
+      args: --Address relay9exitguard --Nickname relay9exitguard --defaults-torrc
+        torrc-defaults -f torrc
+      start_time: 2
+      expected_final_state: running
+    - path: ~/.local/bin/oniontrace
+      args: Mode=log TorControlPort=9051 LogLevel=info Events=BW,CIRC
+      start_time: 3
+      expected_final_state: running
+  relay10exitguard:
+    network_node_id: 1283
+    ip_addr: 185.241.208.206
+    bandwidth_down: 137256 kilobit
+    bandwidth_up: 137256 kilobit
+    processes:
+    - path: ~/.local/bin/tor
+      args: --Address relay10exitguard --Nickname relay10exitguard --defaults-torrc
+        torrc-defaults -f torrc
+      start_time: 2
+      expected_final_state: running
+    - path: ~/.local/bin/oniontrace
+      args: Mode=log TorControlPort=9051 LogLevel=info Events=BW,CIRC
+      start_time: 3
+      expected_final_state: running
+  relay11exitguard:
+    network_node_id: 1763
+    ip_addr: 45.141.215.19
+    bandwidth_down: 124000 kilobit
+    bandwidth_up: 124000 kilobit
+    processes:
+    - path: ~/.local/bin/tor
+      args: --Address relay11exitguard --Nickname relay11exitguard --defaults-torrc
+        torrc-defaults -f torrc
+      start_time: 2
+      expected_final_state: running
+    - path: ~/.local/bin/oniontrace
+      args: Mode=log TorControlPort=9051 LogLevel=info Events=BW,CIRC
+      start_time: 3
+      expected_final_state: running
+  relay12exitguard:
+    network_node_id: 1763
+    ip_addr: 45.138.16.107
+    bandwidth_down: 106208 kilobit
+    bandwidth_up: 106208 kilobit
+    processes:
+    - path: ~/.local/bin/tor
+      args: --Address relay12exitguard --Nickname relay12exitguard --defaults-torrc
+        torrc-defaults -f torrc
+      start_time: 2
+      expected_final_state: running
+    - path: ~/.local/bin/oniontrace
+      args: Mode=log TorControlPort=9051 LogLevel=info Events=BW,CIRC
+      start_time: 3
+      expected_final_state: running
+  relay13exitguard:
+    network_node_id: 1131
+    ip_addr: 204.8.96.70
+    bandwidth_down: 95320 kilobit
+    bandwidth_up: 95320 kilobit
+    processes:
+    - path: ~/.local/bin/tor
+      args: --Address relay13exitguard --Nickname relay13exitguard --defaults-torrc
+        torrc-defaults -f torrc
+      start_time: 2
+      expected_final_state: running
+    - path: ~/.local/bin/oniontrace
+      args: Mode=log TorControlPort=9051 LogLevel=info Events=BW,CIRC
+      start_time: 3
+      expected_final_state: running
+  relay14exitguard:
+    network_node_id: 577
+    ip_addr: 45.88.186.92
+    bandwidth_down: 99672 kilobit
+    bandwidth_up: 99672 kilobit
+    processes:
+    - path: ~/.local/bin/tor
+      args: --Address relay14exitguard --Nickname relay14exitguard --defaults-torrc
+        torrc-defaults -f torrc
+      start_time: 2
+      expected_final_state: running
+    - path: ~/.local/bin/oniontrace
+      args: Mode=log TorControlPort=9051 LogLevel=info Events=BW,CIRC
+      start_time: 3
+      expected_final_state: running
+  relay15exitguard:
+    network_node_id: 503
+    ip_addr: 107.189.1.175
+    bandwidth_down: 78488 kilobit
+    bandwidth_up: 78488 kilobit
+    processes:
+    - path: ~/.local/bin/tor
+      args: --Address relay15exitguard --Nickname relay15exitguard --defaults-torrc
+        torrc-defaults -f torrc
+      start_time: 2
+      expected_final_state: running
+    - path: ~/.local/bin/oniontrace
+      args: Mode=log TorControlPort=9051 LogLevel=info Events=BW,CIRC
+      start_time: 3
+      expected_final_state: running
+  relay16exitguard:
+    network_node_id: 275
+    ip_addr: 100.42.28.70
+    bandwidth_down: 63696 kilobit
+    bandwidth_up: 63696 kilobit
+    processes:
+    - path: ~/.local/bin/tor
+      args: --Address relay16exitguard --Nickname relay16exitguard --defaults-torrc
+        torrc-defaults -f torrc
+      start_time: 2
+      expected_final_state: running
+    - path: ~/.local/bin/oniontrace
+      args: Mode=log TorControlPort=9051 LogLevel=info Events=BW,CIRC
+      start_time: 3
+      expected_final_state: running
+  relay17exit:
+    network_node_id: 1854
+    ip_addr: 192.42.116.200
+    bandwidth_down: 237984 kilobit
+    bandwidth_up: 237984 kilobit
+    processes:
+    - path: ~/.local/bin/tor
+      args: --Address relay17exit --Nickname relay17exit --defaults-torrc torrc-defaults
+        -f torrc
+      start_time: 3
+      expected_final_state: running
+    - path: ~/.local/bin/oniontrace
+      args: Mode=log TorControlPort=9051 LogLevel=info Events=BW,CIRC
+      start_time: 4
+      expected_final_state: running
+  relay18exit:
+    network_node_id: 1292
+    ip_addr: 109.70.100.1
+    bandwidth_down: 231040 kilobit
+    bandwidth_up: 231040 kilobit
+    processes:
+    - path: ~/.local/bin/tor
+      args: --Address relay18exit --Nickname relay18exit --defaults-torrc torrc-defaults
+        -f torrc
+      start_time: 3
+      expected_final_state: running
+    - path: ~/.local/bin/oniontrace
+      args: Mode=log TorControlPort=9051 LogLevel=info Events=BW,CIRC
+      start_time: 4
+      expected_final_state: running
+  relay19exit:
+    network_node_id: 802
+    ip_addr: 45.84.107.54
+    bandwidth_down: 243144 kilobit
+    bandwidth_up: 243144 kilobit
+    processes:
+    - path: ~/.local/bin/tor
+      args: --Address relay19exit --Nickname relay19exit --defaults-torrc torrc-defaults
+        -f torrc
+      start_time: 3
+      expected_final_state: running
+    - path: ~/.local/bin/oniontrace
+      args: Mode=log TorControlPort=9051 LogLevel=info Events=BW,CIRC
+      start_time: 4
+      expected_final_state: running
+  relay20exit:
+    network_node_id: 1292
+    ip_addr: 109.70.100.70
+    bandwidth_down: 231432 kilobit
+    bandwidth_up: 231432 kilobit
+    processes:
+    - path: ~/.local/bin/tor
+      args: --Address relay20exit --Nickname relay20exit --defaults-torrc torrc-defaults
+        -f torrc
+      start_time: 3
+      expected_final_state: running
+    - path: ~/.local/bin/oniontrace
+      args: Mode=log TorControlPort=9051 LogLevel=info Events=BW,CIRC
+      start_time: 4
+      expected_final_state: running
+  relay21exit:
+    network_node_id: 1292
+    ip_addr: 109.70.100.68
+    bandwidth_down: 234608 kilobit
+    bandwidth_up: 234608 kilobit
+    processes:
+    - path: ~/.local/bin/tor
+      args: --Address relay21exit --Nickname relay21exit --defaults-torrc torrc-defaults
+        -f torrc
+      start_time: 3
+      expected_final_state: running
+    - path: ~/.local/bin/oniontrace
+      args: Mode=log TorControlPort=9051 LogLevel=info Events=BW,CIRC
+      start_time: 4
+      expected_final_state: running
+  relay22exit:
+    network_node_id: 1940
+    ip_addr: 195.47.238.93
+    bandwidth_down: 173544 kilobit
+    bandwidth_up: 173544 kilobit
+    processes:
+    - path: ~/.local/bin/tor
+      args: --Address relay22exit --Nickname relay22exit --defaults-torrc torrc-defaults
+        -f torrc
+      start_time: 3
+      expected_final_state: running
+    - path: ~/.local/bin/oniontrace
+      args: Mode=log TorControlPort=9051 LogLevel=info Events=BW,CIRC
+      start_time: 4
+      expected_final_state: running
+  relay23exit:
+    network_node_id: 2362
+    ip_addr: 104.219.236.100
+    bandwidth_down: 100280 kilobit
+    bandwidth_up: 100280 kilobit
+    processes:
+    - path: ~/.local/bin/tor
+      args: --Address relay23exit --Nickname relay23exit --defaults-torrc torrc-defaults
+        -f torrc
+      start_time: 3
+      expected_final_state: running
+    - path: ~/.local/bin/oniontrace
+      args: Mode=log TorControlPort=9051 LogLevel=info Events=BW,CIRC
+      start_time: 4
+      expected_final_state: running
+  relay24exit:
+    network_node_id: 1143
+    ip_addr: 198.98.51.249
+    bandwidth_down: 23496 kilobit
+    bandwidth_up: 23496 kilobit
+    processes:
+    - path: ~/.local/bin/tor
+      args: --Address relay24exit --Nickname relay24exit --defaults-torrc torrc-defaults
+        -f torrc
+      start_time: 3
+      expected_final_state: running
+    - path: ~/.local/bin/oniontrace
+      args: Mode=log TorControlPort=9051 LogLevel=info Events=BW,CIRC
+      start_time: 4
+      expected_final_state: running
+  relay25exit:
+    network_node_id: 760
+    ip_addr: 176.58.121.177
+    bandwidth_down: 1432 kilobit
+    bandwidth_up: 1432 kilobit
+    processes:
+    - path: ~/.local/bin/tor
+      args: --Address relay25exit --Nickname relay25exit --defaults-torrc torrc-defaults
+        -f torrc
+      start_time: 3
+      expected_final_state: running
+    - path: ~/.local/bin/oniontrace
+      args: Mode=log TorControlPort=9051 LogLevel=info Events=BW,CIRC
+      start_time: 4
+      expected_final_state: running
+  relay26guard:
+    network_node_id: 2088
+    ip_addr: 46.4.96.24
+    bandwidth_down: 639096 kilobit
+    bandwidth_up: 639096 kilobit
+    processes:
+    - path: ~/.local/bin/tor
+      args: --Address relay26guard --Nickname relay26guard --defaults-torrc torrc-defaults
+        -f torrc
+      start_time: 4
+      expected_final_state: running
+    - path: ~/.local/bin/oniontrace
+      args: Mode=log TorControlPort=9051 LogLevel=info Events=BW,CIRC
+      start_time: 5
+      expected_final_state: running
+  relay27guard:
+    network_node_id: 1225
+    ip_addr: 65.108.193.42
+    bandwidth_down: 544832 kilobit
+    bandwidth_up: 544832 kilobit
+    processes:
+    - path: ~/.local/bin/tor
+      args: --Address relay27guard --Nickname relay27guard --defaults-torrc torrc-defaults
+        -f torrc
+      start_time: 4
+      expected_final_state: running
+    - path: ~/.local/bin/oniontrace
+      args: Mode=log TorControlPort=9051 LogLevel=info Events=BW,CIRC
+      start_time: 5
+      expected_final_state: running
+  relay28guard:
+    network_node_id: 387
+    ip_addr: 135.181.67.210
+    bandwidth_down: 436328 kilobit
+    bandwidth_up: 436328 kilobit
+    processes:
+    - path: ~/.local/bin/tor
+      args: --Address relay28guard --Nickname relay28guard --defaults-torrc torrc-defaults
+        -f torrc
+      start_time: 4
+      expected_final_state: running
+    - path: ~/.local/bin/oniontrace
+      args: Mode=log TorControlPort=9051 LogLevel=info Events=BW,CIRC
+      start_time: 5
+      expected_final_state: running
+  relay29guard:
+    network_node_id: 2024
+    ip_addr: 45.90.187.25
+    bandwidth_down: 332568 kilobit
+    bandwidth_up: 332568 kilobit
+    processes:
+    - path: ~/.local/bin/tor
+      args: --Address relay29guard --Nickname relay29guard --defaults-torrc torrc-defaults
+        -f torrc
+      start_time: 4
+      expected_final_state: running
+    - path: ~/.local/bin/oniontrace
+      args: Mode=log TorControlPort=9051 LogLevel=info Events=BW,CIRC
+      start_time: 5
+      expected_final_state: running
+  relay30guard:
+    network_node_id: 2143
+    ip_addr: 78.159.131.35
+    bandwidth_down: 315224 kilobit
+    bandwidth_up: 315224 kilobit
+    processes:
+    - path: ~/.local/bin/tor
+      args: --Address relay30guard --Nickname relay30guard --defaults-torrc torrc-defaults
+        -f torrc
+      start_time: 4
+      expected_final_state: running
+    - path: ~/.local/bin/oniontrace
+      args: Mode=log TorControlPort=9051 LogLevel=info Events=BW,CIRC
+      start_time: 5
+      expected_final_state: running
+  relay31guard:
+    network_node_id: 1601
+    ip_addr: 185.220.101.173
+    bandwidth_down: 328176 kilobit
+    bandwidth_up: 328176 kilobit
+    processes:
+    - path: ~/.local/bin/tor
+      args: --Address relay31guard --Nickname relay31guard --defaults-torrc torrc-defaults
+        -f torrc
+      start_time: 4
+      expected_final_state: running
+    - path: ~/.local/bin/oniontrace
+      args: Mode=log TorControlPort=9051 LogLevel=info Events=BW,CIRC
+      start_time: 5
+      expected_final_state: running
+  relay32guard:
+    network_node_id: 1742
+    ip_addr: 64.65.1.163
+    bandwidth_down: 395848 kilobit
+    bandwidth_up: 395848 kilobit
+    processes:
+    - path: ~/.local/bin/tor
+      args: --Address relay32guard --Nickname relay32guard --defaults-torrc torrc-defaults
+        -f torrc
+      start_time: 4
+      expected_final_state: running
+    - path: ~/.local/bin/oniontrace
+      args: Mode=log TorControlPort=9051 LogLevel=info Events=BW,CIRC
+      start_time: 5
+      expected_final_state: running
+  relay33guard:
+    network_node_id: 2325
+    ip_addr: 213.165.83.14
+    bandwidth_down: 285512 kilobit
+    bandwidth_up: 285512 kilobit
+    processes:
+    - path: ~/.local/bin/tor
+      args: --Address relay33guard --Nickname relay33guard --defaults-torrc torrc-defaults
+        -f torrc
+      start_time: 4
+      expected_final_state: running
+    - path: ~/.local/bin/oniontrace
+      args: Mode=log TorControlPort=9051 LogLevel=info Events=BW,CIRC
+      start_time: 5
+      expected_final_state: running
+  relay34guard:
+    network_node_id: 436
+    ip_addr: 145.239.93.202
+    bandwidth_down: 437800 kilobit
+    bandwidth_up: 437800 kilobit
+    processes:
+    - path: ~/.local/bin/tor
+      args: --Address relay34guard --Nickname relay34guard --defaults-torrc torrc-defaults
+        -f torrc
+      start_time: 4
+      expected_final_state: running
+    - path: ~/.local/bin/oniontrace
+      args: Mode=log TorControlPort=9051 LogLevel=info Events=BW,CIRC
+      start_time: 5
+      expected_final_state: running
+  relay35guard:
+    network_node_id: 1742
+    ip_addr: 64.65.0.67
+    bandwidth_down: 332520 kilobit
+    bandwidth_up: 332520 kilobit
+    processes:
+    - path: ~/.local/bin/tor
+      args: --Address relay35guard --Nickname relay35guard --defaults-torrc torrc-defaults
+        -f torrc
+      start_time: 4
+      expected_final_state: running
+    - path: ~/.local/bin/oniontrace
+      args: Mode=log TorControlPort=9051 LogLevel=info Events=BW,CIRC
+      start_time: 5
+      expected_final_state: running
+  relay36guard:
+    network_node_id: 2276
+    ip_addr: 185.177.229.228
+    bandwidth_down: 217976 kilobit
+    bandwidth_up: 217976 kilobit
+    processes:
+    - path: ~/.local/bin/tor
+      args: --Address relay36guard --Nickname relay36guard --defaults-torrc torrc-defaults
+        -f torrc
+      start_time: 4
+      expected_final_state: running
+    - path: ~/.local/bin/oniontrace
+      args: Mode=log TorControlPort=9051 LogLevel=info Events=BW,CIRC
+      start_time: 5
+      expected_final_state: running
+  relay37guard:
+    network_node_id: 1154
+    ip_addr: 193.219.97.25
+    bandwidth_down: 181752 kilobit
+    bandwidth_up: 181752 kilobit
+    processes:
+    - path: ~/.local/bin/tor
+      args: --Address relay37guard --Nickname relay37guard --defaults-torrc torrc-defaults
+        -f torrc
+      start_time: 4
+      expected_final_state: running
+    - path: ~/.local/bin/oniontrace
+      args: Mode=log TorControlPort=9051 LogLevel=info Events=BW,CIRC
+      start_time: 5
+      expected_final_state: running
+  relay38guard:
+    network_node_id: 2143
+    ip_addr: 78.159.131.66
+    bandwidth_down: 161528 kilobit
+    bandwidth_up: 161528 kilobit
+    processes:
+    - path: ~/.local/bin/tor
+      args: --Address relay38guard --Nickname relay38guard --defaults-torrc torrc-defaults
+        -f torrc
+      start_time: 4
+      expected_final_state: running
+    - path: ~/.local/bin/oniontrace
+      args: Mode=log TorControlPort=9051 LogLevel=info Events=BW,CIRC
+      start_time: 5
+      expected_final_state: running
+  relay39guard:
+    network_node_id: 2219
+    ip_addr: 176.65.149.65
+    bandwidth_down: 164696 kilobit
+    bandwidth_up: 164696 kilobit
+    processes:
+    - path: ~/.local/bin/tor
+      args: --Address relay39guard --Nickname relay39guard --defaults-torrc torrc-defaults
+        -f torrc
+      start_time: 4
+      expected_final_state: running
+    - path: ~/.local/bin/oniontrace
+      args: Mode=log TorControlPort=9051 LogLevel=info Events=BW,CIRC
+      start_time: 5
+      expected_final_state: running
+  relay40guard:
+    network_node_id: 1546
+    ip_addr: 77.234.79.34
+    bandwidth_down: 154976 kilobit
+    bandwidth_up: 154976 kilobit
+    processes:
+    - path: ~/.local/bin/tor
+      args: --Address relay40guard --Nickname relay40guard --defaults-torrc torrc-defaults
+        -f torrc
+      start_time: 4
+      expected_final_state: running
+    - path: ~/.local/bin/oniontrace
+      args: Mode=log TorControlPort=9051 LogLevel=info Events=BW,CIRC
+      start_time: 5
+      expected_final_state: running
+  relay41guard:
+    network_node_id: 1047
+    ip_addr: 96.9.98.180
+    bandwidth_down: 400216 kilobit
+    bandwidth_up: 400216 kilobit
+    processes:
+    - path: ~/.local/bin/tor
+      args: --Address relay41guard --Nickname relay41guard --defaults-torrc torrc-defaults
+        -f torrc
+      start_time: 4
+      expected_final_state: running
+    - path: ~/.local/bin/oniontrace
+      args: Mode=log TorControlPort=9051 LogLevel=info Events=BW,CIRC
+      start_time: 5
+      expected_final_state: running
+  relay42guard:
+    network_node_id: 973
+    ip_addr: 83.168.88.144
+    bandwidth_down: 107232 kilobit
+    bandwidth_up: 107232 kilobit
+    processes:
+    - path: ~/.local/bin/tor
+      args: --Address relay42guard --Nickname relay42guard --defaults-torrc torrc-defaults
+        -f torrc
+      start_time: 4
+      expected_final_state: running
+    - path: ~/.local/bin/oniontrace
+      args: Mode=log TorControlPort=9051 LogLevel=info Events=BW,CIRC
+      start_time: 5
+      expected_final_state: running
+  relay43guard:
+    network_node_id: 1735
+    ip_addr: 51.158.154.112
+    bandwidth_down: 78688 kilobit
+    bandwidth_up: 78688 kilobit
+    processes:
+    - path: ~/.local/bin/tor
+      args: --Address relay43guard --Nickname relay43guard --defaults-torrc torrc-defaults
+        -f torrc
+      start_time: 4
+      expected_final_state: running
+    - path: ~/.local/bin/oniontrace
+      args: Mode=log TorControlPort=9051 LogLevel=info Events=BW,CIRC
+      start_time: 5
+      expected_final_state: running
+  relay44guard:
+    network_node_id: 625
+    ip_addr: 167.86.74.109
+    bandwidth_down: 95992 kilobit
+    bandwidth_up: 95992 kilobit
+    processes:
+    - path: ~/.local/bin/tor
+      args: --Address relay44guard --Nickname relay44guard --defaults-torrc torrc-defaults
+        -f torrc
+      start_time: 4
+      expected_final_state: running
+    - path: ~/.local/bin/oniontrace
+      args: Mode=log TorControlPort=9051 LogLevel=info Events=BW,CIRC
+      start_time: 5
+      expected_final_state: running
+  relay45guard:
+    network_node_id: 1643
+    ip_addr: 202.78.160.129
+    bandwidth_down: 76168 kilobit
+    bandwidth_up: 76168 kilobit
+    processes:
+    - path: ~/.local/bin/tor
+      args: --Address relay45guard --Nickname relay45guard --defaults-torrc torrc-defaults
+        -f torrc
+      start_time: 4
+      expected_final_state: running
+    - path: ~/.local/bin/oniontrace
+      args: Mode=log TorControlPort=9051 LogLevel=info Events=BW,CIRC
+      start_time: 5
+      expected_final_state: running
+  relay46guard:
+    network_node_id: 1047
+    ip_addr: 96.9.98.155
+    bandwidth_down: 111816 kilobit
+    bandwidth_up: 111816 kilobit
+    processes:
+    - path: ~/.local/bin/tor
+      args: --Address relay46guard --Nickname relay46guard --defaults-torrc torrc-defaults
+        -f torrc
+      start_time: 4
+      expected_final_state: running
+    - path: ~/.local/bin/oniontrace
+      args: Mode=log TorControlPort=9051 LogLevel=info Events=BW,CIRC
+      start_time: 5
+      expected_final_state: running
+  relay47guard:
+    network_node_id: 2097
+    ip_addr: 147.135.70.168
+    bandwidth_down: 87328 kilobit
+    bandwidth_up: 87328 kilobit
+    processes:
+    - path: ~/.local/bin/tor
+      args: --Address relay47guard --Nickname relay47guard --defaults-torrc torrc-defaults
+        -f torrc
+      start_time: 4
+      expected_final_state: running
+    - path: ~/.local/bin/oniontrace
+      args: Mode=log TorControlPort=9051 LogLevel=info Events=BW,CIRC
+      start_time: 5
+      expected_final_state: running
+  relay48guard:
+    network_node_id: 1742
+    ip_addr: 64.65.1.148
+    bandwidth_down: 231408 kilobit
+    bandwidth_up: 231408 kilobit
+    processes:
+    - path: ~/.local/bin/tor
+      args: --Address relay48guard --Nickname relay48guard --defaults-torrc torrc-defaults
+        -f torrc
+      start_time: 4
+      expected_final_state: running
+    - path: ~/.local/bin/oniontrace
+      args: Mode=log TorControlPort=9051 LogLevel=info Events=BW,CIRC
+      start_time: 5
+      expected_final_state: running
+  relay49guard:
+    network_node_id: 1742
+    ip_addr: 64.65.1.23
+    bandwidth_down: 120344 kilobit
+    bandwidth_up: 120344 kilobit
+    processes:
+    - path: ~/.local/bin/tor
+      args: --Address relay49guard --Nickname relay49guard --defaults-torrc torrc-defaults
+        -f torrc
+      start_time: 4
+      expected_final_state: running
+    - path: ~/.local/bin/oniontrace
+      args: Mode=log TorControlPort=9051 LogLevel=info Events=BW,CIRC
+      start_time: 5
+      expected_final_state: running
+  relay50guard:
+    network_node_id: 638
+    ip_addr: 149.56.126.142
+    bandwidth_down: 112072 kilobit
+    bandwidth_up: 112072 kilobit
+    processes:
+    - path: ~/.local/bin/tor
+      args: --Address relay50guard --Nickname relay50guard --defaults-torrc torrc-defaults
+        -f torrc
+      start_time: 4
+      expected_final_state: running
+    - path: ~/.local/bin/oniontrace
+      args: Mode=log TorControlPort=9051 LogLevel=info Events=BW,CIRC
+      start_time: 5
+      expected_final_state: running
+  relay51guard:
+    network_node_id: 2056
+    ip_addr: 81.17.28.117
+    bandwidth_down: 63152 kilobit
+    bandwidth_up: 63152 kilobit
+    processes:
+    - path: ~/.local/bin/tor
+      args: --Address relay51guard --Nickname relay51guard --defaults-torrc torrc-defaults
+        -f torrc
+      start_time: 4
+      expected_final_state: running
+    - path: ~/.local/bin/oniontrace
+      args: Mode=log TorControlPort=9051 LogLevel=info Events=BW,CIRC
+      start_time: 5
+      expected_final_state: running
+  relay52guard:
+    network_node_id: 1047
+    ip_addr: 96.9.98.199
+    bandwidth_down: 134904 kilobit
+    bandwidth_up: 134904 kilobit
+    processes:
+    - path: ~/.local/bin/tor
+      args: --Address relay52guard --Nickname relay52guard --defaults-torrc torrc-defaults
+        -f torrc
+      start_time: 4
+      expected_final_state: running
+    - path: ~/.local/bin/oniontrace
+      args: Mode=log TorControlPort=9051 LogLevel=info Events=BW,CIRC
+      start_time: 5
+      expected_final_state: running
+  relay53guard:
+    network_node_id: 804
+    ip_addr: 108.244.47.44
+    bandwidth_down: 113016 kilobit
+    bandwidth_up: 113016 kilobit
+    processes:
+    - path: ~/.local/bin/tor
+      args: --Address relay53guard --Nickname relay53guard --defaults-torrc torrc-defaults
+        -f torrc
+      start_time: 4
+      expected_final_state: running
+    - path: ~/.local/bin/oniontrace
+      args: Mode=log TorControlPort=9051 LogLevel=info Events=BW,CIRC
+      start_time: 5
+      expected_final_state: running
+  relay54guard:
+    network_node_id: 1047
+    ip_addr: 96.9.98.100
+    bandwidth_down: 93008 kilobit
+    bandwidth_up: 93008 kilobit
+    processes:
+    - path: ~/.local/bin/tor
+      args: --Address relay54guard --Nickname relay54guard --defaults-torrc torrc-defaults
+        -f torrc
+      start_time: 4
+      expected_final_state: running
+    - path: ~/.local/bin/oniontrace
+      args: Mode=log TorControlPort=9051 LogLevel=info Events=BW,CIRC
+      start_time: 5
+      expected_final_state: running
+  relay55guard:
+    network_node_id: 2414
+    ip_addr: 54.39.52.18
+    bandwidth_down: 89824 kilobit
+    bandwidth_up: 89824 kilobit
+    processes:
+    - path: ~/.local/bin/tor
+      args: --Address relay55guard --Nickname relay55guard --defaults-torrc torrc-defaults
+        -f torrc
+      start_time: 4
+      expected_final_state: running
+    - path: ~/.local/bin/oniontrace
+      args: Mode=log TorControlPort=9051 LogLevel=info Events=BW,CIRC
+      start_time: 5
+      expected_final_state: running
+  relay56guard:
+    network_node_id: 131
+    ip_addr: 135.148.149.23
+    bandwidth_down: 69608 kilobit
+    bandwidth_up: 69608 kilobit
+    processes:
+    - path: ~/.local/bin/tor
+      args: --Address relay56guard --Nickname relay56guard --defaults-torrc torrc-defaults
+        -f torrc
+      start_time: 4
+      expected_final_state: running
+    - path: ~/.local/bin/oniontrace
+      args: Mode=log TorControlPort=9051 LogLevel=info Events=BW,CIRC
+      start_time: 5
+      expected_final_state: running
+  relay57guard:
+    network_node_id: 1933
+    ip_addr: 193.46.56.106
+    bandwidth_down: 58104 kilobit
+    bandwidth_up: 58104 kilobit
+    processes:
+    - path: ~/.local/bin/tor
+      args: --Address relay57guard --Nickname relay57guard --defaults-torrc torrc-defaults
+        -f torrc
+      start_time: 4
+      expected_final_state: running
+    - path: ~/.local/bin/oniontrace
+      args: Mode=log TorControlPort=9051 LogLevel=info Events=BW,CIRC
+      start_time: 5
+      expected_final_state: running
+  relay58guard:
+    network_node_id: 132
+    ip_addr: 149.202.69.174
+    bandwidth_down: 31000 kilobit
+    bandwidth_up: 31000 kilobit
+    processes:
+    - path: ~/.local/bin/tor
+      args: --Address relay58guard --Nickname relay58guard --defaults-torrc torrc-defaults
+        -f torrc
+      start_time: 4
+      expected_final_state: running
+    - path: ~/.local/bin/oniontrace
+      args: Mode=log TorControlPort=9051 LogLevel=info Events=BW,CIRC
+      start_time: 5
+      expected_final_state: running
+  relay59guard:
+    network_node_id: 1343
+    ip_addr: 185.175.56.120
+    bandwidth_down: 23848 kilobit
+    bandwidth_up: 23848 kilobit
+    processes:
+    - path: ~/.local/bin/tor
+      args: --Address relay59guard --Nickname relay59guard --defaults-torrc torrc-defaults
+        -f torrc
+      start_time: 4
+      expected_final_state: running
+    - path: ~/.local/bin/oniontrace
+      args: Mode=log TorControlPort=9051 LogLevel=info Events=BW,CIRC
+      start_time: 5
+      expected_final_state: running
+  relay60guard:
+    network_node_id: 1544
+    ip_addr: 205.185.119.222
+    bandwidth_down: 112872 kilobit
+    bandwidth_up: 112872 kilobit
+    processes:
+    - path: ~/.local/bin/tor
+      args: --Address relay60guard --Nickname relay60guard --defaults-torrc torrc-defaults
+        -f torrc
+      start_time: 4
+      expected_final_state: running
+    - path: ~/.local/bin/oniontrace
+      args: Mode=log TorControlPort=9051 LogLevel=info Events=BW,CIRC
+      start_time: 5
+      expected_final_state: running
+  relay61middle:
+    network_node_id: 1854
+    ip_addr: 192.42.116.187
+    bandwidth_down: 328736 kilobit
+    bandwidth_up: 328736 kilobit
+    processes:
+    - path: ~/.local/bin/tor
+      args: --Address relay61middle --Nickname relay61middle --defaults-torrc torrc-defaults
+        -f torrc
+      start_time: 5
+      expected_final_state: running
+    - path: ~/.local/bin/oniontrace
+      args: Mode=log TorControlPort=9051 LogLevel=info Events=BW,CIRC
+      start_time: 6
+      expected_final_state: running
+  relay62middle:
+    network_node_id: 2355
+    ip_addr: 217.154.206.245
+    bandwidth_down: 176624 kilobit
+    bandwidth_up: 176624 kilobit
+    processes:
+    - path: ~/.local/bin/tor
+      args: --Address relay62middle --Nickname relay62middle --defaults-torrc torrc-defaults
+        -f torrc
+      start_time: 5
+      expected_final_state: running
+    - path: ~/.local/bin/oniontrace
+      args: Mode=log TorControlPort=9051 LogLevel=info Events=BW,CIRC
+      start_time: 6
+      expected_final_state: running
+  relay63middle:
+    network_node_id: 344
+    ip_addr: 185.148.1.210
+    bandwidth_down: 209768 kilobit
+    bandwidth_up: 209768 kilobit
+    processes:
+    - path: ~/.local/bin/tor
+      args: --Address relay63middle --Nickname relay63middle --defaults-torrc torrc-defaults
+        -f torrc
+      start_time: 5
+      expected_final_state: running
+    - path: ~/.local/bin/oniontrace
+      args: Mode=log TorControlPort=9051 LogLevel=info Events=BW,CIRC
+      start_time: 6
+      expected_final_state: running
+  relay64middle:
+    network_node_id: 719
+    ip_addr: 108.165.164.16
+    bandwidth_down: 79976 kilobit
+    bandwidth_up: 79976 kilobit
+    processes:
+    - path: ~/.local/bin/tor
+      args: --Address relay64middle --Nickname relay64middle --defaults-torrc torrc-defaults
+        -f torrc
+      start_time: 5
+      expected_final_state: running
+    - path: ~/.local/bin/oniontrace
+      args: Mode=log TorControlPort=9051 LogLevel=info Events=BW,CIRC
+      start_time: 6
+      expected_final_state: running
+  relay65middle:
+    network_node_id: 723
+    ip_addr: 80.78.31.42
+    bandwidth_down: 177032 kilobit
+    bandwidth_up: 177032 kilobit
+    processes:
+    - path: ~/.local/bin/tor
+      args: --Address relay65middle --Nickname relay65middle --defaults-torrc torrc-defaults
+        -f torrc
+      start_time: 5
+      expected_final_state: running
+    - path: ~/.local/bin/oniontrace
+      args: Mode=log TorControlPort=9051 LogLevel=info Events=BW,CIRC
+      start_time: 6
+      expected_final_state: running
+  relay66middle:
+    network_node_id: 821
+    ip_addr: 213.183.53.249
+    bandwidth_down: 90064 kilobit
+    bandwidth_up: 90064 kilobit
+    processes:
+    - path: ~/.local/bin/tor
+      args: --Address relay66middle --Nickname relay66middle --defaults-torrc torrc-defaults
+        -f torrc
+      start_time: 5
+      expected_final_state: running
+    - path: ~/.local/bin/oniontrace
+      args: Mode=log TorControlPort=9051 LogLevel=info Events=BW,CIRC
+      start_time: 6
+      expected_final_state: running
+  relay67middle:
+    network_node_id: 2415
+    ip_addr: 134.209.167.158
+    bandwidth_down: 78672 kilobit
+    bandwidth_up: 78672 kilobit
+    processes:
+    - path: ~/.local/bin/tor
+      args: --Address relay67middle --Nickname relay67middle --defaults-torrc torrc-defaults
+        -f torrc
+      start_time: 5
+      expected_final_state: running
+    - path: ~/.local/bin/oniontrace
+      args: Mode=log TorControlPort=9051 LogLevel=info Events=BW,CIRC
+      start_time: 6
+      expected_final_state: running
+  relay68middle:
+    network_node_id: 224
+    ip_addr: 74.208.238.90
+    bandwidth_down: 61728 kilobit
+    bandwidth_up: 61728 kilobit
+    processes:
+    - path: ~/.local/bin/tor
+      args: --Address relay68middle --Nickname relay68middle --defaults-torrc torrc-defaults
+        -f torrc
+      start_time: 5
+      expected_final_state: running
+    - path: ~/.local/bin/oniontrace
+      args: Mode=log TorControlPort=9051 LogLevel=info Events=BW,CIRC
+      start_time: 6
+      expected_final_state: running
+  relay69middle:
+    network_node_id: 198
+    ip_addr: 192.9.249.147
+    bandwidth_down: 67248 kilobit
+    bandwidth_up: 67248 kilobit
+    processes:
+    - path: ~/.local/bin/tor
+      args: --Address relay69middle --Nickname relay69middle --defaults-torrc torrc-defaults
+        -f torrc
+      start_time: 5
+      expected_final_state: running
+    - path: ~/.local/bin/oniontrace
+      args: Mode=log TorControlPort=9051 LogLevel=info Events=BW,CIRC
+      start_time: 6
+      expected_final_state: running
+  relay70middle:
+    network_node_id: 1513
+    ip_addr: 49.12.202.3
+    bandwidth_down: 18624 kilobit
+    bandwidth_up: 18624 kilobit
+    processes:
+    - path: ~/.local/bin/tor
+      args: --Address relay70middle --Nickname relay70middle --defaults-torrc torrc-defaults
+        -f torrc
+      start_time: 5
+      expected_final_state: running
+    - path: ~/.local/bin/oniontrace
+      args: Mode=log TorControlPort=9051 LogLevel=info Events=BW,CIRC
+      start_time: 6
+      expected_final_state: running
+  relay71middle:
+    network_node_id: 1951
+    ip_addr: 89.245.40.50
+    bandwidth_down: 17448 kilobit
+    bandwidth_up: 17448 kilobit
+    processes:
+    - path: ~/.local/bin/tor
+      args: --Address relay71middle --Nickname relay71middle --defaults-torrc torrc-defaults
+        -f torrc
+      start_time: 5
+      expected_final_state: running
+    - path: ~/.local/bin/oniontrace
+      args: Mode=log TorControlPort=9051 LogLevel=info Events=BW,CIRC
+      start_time: 6
+      expected_final_state: running
+  relay72middle:
+    network_node_id: 58
+    ip_addr: 82.52.74.216
+    bandwidth_down: 22944 kilobit
+    bandwidth_up: 22944 kilobit
+    processes:
+    - path: ~/.local/bin/tor
+      args: --Address relay72middle --Nickname relay72middle --defaults-torrc torrc-defaults
+        -f torrc
+      start_time: 5
+      expected_final_state: running
+    - path: ~/.local/bin/oniontrace
+      args: Mode=log TorControlPort=9051 LogLevel=info Events=BW,CIRC
+      start_time: 6
+      expected_final_state: running
+  relay73middle:
+    network_node_id: 2064
+    ip_addr: 23.17.69.81
+    bandwidth_down: 60808 kilobit
+    bandwidth_up: 60808 kilobit
+    processes:
+    - path: ~/.local/bin/tor
+      args: --Address relay73middle --Nickname relay73middle --defaults-torrc torrc-defaults
+        -f torrc
+      start_time: 5
+      expected_final_state: running
+    - path: ~/.local/bin/oniontrace
+      args: Mode=log TorControlPort=9051 LogLevel=info Events=BW,CIRC
+      start_time: 6
+      expected_final_state: running
+  relay74middle:
+    network_node_id: 1168
+    ip_addr: 89.212.103.241
+    bandwidth_down: 17504 kilobit
+    bandwidth_up: 17504 kilobit
+    processes:
+    - path: ~/.local/bin/tor
+      args: --Address relay74middle --Nickname relay74middle --defaults-torrc torrc-defaults
+        -f torrc
+      start_time: 5
+      expected_final_state: running
+    - path: ~/.local/bin/oniontrace
+      args: Mode=log TorControlPort=9051 LogLevel=info Events=BW,CIRC
+      start_time: 6
+      expected_final_state: running
+  relay75middle:
+    network_node_id: 131
+    ip_addr: 135.180.6.201
+    bandwidth_down: 26872 kilobit
+    bandwidth_up: 26872 kilobit
+    processes:
+    - path: ~/.local/bin/tor
+      args: --Address relay75middle --Nickname relay75middle --defaults-torrc torrc-defaults
+        -f torrc
+      start_time: 5
+      expected_final_state: running
+    - path: ~/.local/bin/oniontrace
+      args: Mode=log TorControlPort=9051 LogLevel=info Events=BW,CIRC
+      start_time: 6
+      expected_final_state: running
+  relay76middle:
+    network_node_id: 794
+    ip_addr: 158.51.111.120
+    bandwidth_down: 36248 kilobit
+    bandwidth_up: 36248 kilobit
+    processes:
+    - path: ~/.local/bin/tor
+      args: --Address relay76middle --Nickname relay76middle --defaults-torrc torrc-defaults
+        -f torrc
+      start_time: 5
+      expected_final_state: running
+    - path: ~/.local/bin/oniontrace
+      args: Mode=log TorControlPort=9051 LogLevel=info Events=BW,CIRC
+      start_time: 6
+      expected_final_state: running
+  relay77middle:
+    network_node_id: 2169
+    ip_addr: 1.161.190.150
+    bandwidth_down: 41072 kilobit
+    bandwidth_up: 41072 kilobit
+    processes:
+    - path: ~/.local/bin/tor
+      args: --Address relay77middle --Nickname relay77middle --defaults-torrc torrc-defaults
+        -f torrc
+      start_time: 5
+      expected_final_state: running
+    - path: ~/.local/bin/oniontrace
+      args: Mode=log TorControlPort=9051 LogLevel=info Events=BW,CIRC
+      start_time: 6
+      expected_final_state: running
+  relay78middle:
+    network_node_id: 2089
+    ip_addr: 94.130.10.251
+    bandwidth_down: 8792 kilobit
+    bandwidth_up: 8792 kilobit
+    processes:
+    - path: ~/.local/bin/tor
+      args: --Address relay78middle --Nickname relay78middle --defaults-torrc torrc-defaults
+        -f torrc
+      start_time: 5
+      expected_final_state: running
+    - path: ~/.local/bin/oniontrace
+      args: Mode=log TorControlPort=9051 LogLevel=info Events=BW,CIRC
+      start_time: 6
+      expected_final_state: running
+  relay79middle:
+    network_node_id: 449
+    ip_addr: 103.28.53.25
+    bandwidth_down: 17840 kilobit
+    bandwidth_up: 17840 kilobit
+    processes:
+    - path: ~/.local/bin/tor
+      args: --Address relay79middle --Nickname relay79middle --defaults-torrc torrc-defaults
+        -f torrc
+      start_time: 5
+      expected_final_state: running
+    - path: ~/.local/bin/oniontrace
+      args: Mode=log TorControlPort=9051 LogLevel=info Events=BW,CIRC
+      start_time: 6
+      expected_final_state: running
+  relay80middle:
+    network_node_id: 1126
+    ip_addr: 162.251.156.68
+    bandwidth_down: 21768 kilobit
+    bandwidth_up: 21768 kilobit
+    processes:
+    - path: ~/.local/bin/tor
+      args: --Address relay80middle --Nickname relay80middle --defaults-torrc torrc-defaults
+        -f torrc
+      start_time: 5
+      expected_final_state: running
+    - path: ~/.local/bin/oniontrace
+      args: Mode=log TorControlPort=9051 LogLevel=info Events=BW,CIRC
+      start_time: 6
+      expected_final_state: running
+  relay81middle:
+    network_node_id: 2261
+    ip_addr: 144.6.128.247
+    bandwidth_down: 15752 kilobit
+    bandwidth_up: 15752 kilobit
+    processes:
+    - path: ~/.local/bin/tor
+      args: --Address relay81middle --Nickname relay81middle --defaults-torrc torrc-defaults
+        -f torrc
+      start_time: 5
+      expected_final_state: running
+    - path: ~/.local/bin/oniontrace
+      args: Mode=log TorControlPort=9051 LogLevel=info Events=BW,CIRC
+      start_time: 6
+      expected_final_state: running
+  relay82middle:
+    network_node_id: 573
+    ip_addr: 212.144.96.29
+    bandwidth_down: 4424 kilobit
+    bandwidth_up: 4424 kilobit
+    processes:
+    - path: ~/.local/bin/tor
+      args: --Address relay82middle --Nickname relay82middle --defaults-torrc torrc-defaults
+        -f torrc
+      start_time: 5
+      expected_final_state: running
+    - path: ~/.local/bin/oniontrace
+      args: Mode=log TorControlPort=9051 LogLevel=info Events=BW,CIRC
+      start_time: 6
+      expected_final_state: running
+  relay83middle:
+    network_node_id: 171
+    ip_addr: 87.138.152.33
+    bandwidth_down: 4064 kilobit
+    bandwidth_up: 4064 kilobit
+    processes:
+    - path: ~/.local/bin/tor
+      args: --Address relay83middle --Nickname relay83middle --defaults-torrc torrc-defaults
+        -f torrc
+      start_time: 5
+      expected_final_state: running
+    - path: ~/.local/bin/oniontrace
+      args: Mode=log TorControlPort=9051 LogLevel=info Events=BW,CIRC
+      start_time: 6
+      expected_final_state: running
+  relay84middle:
+    network_node_id: 1844
+    ip_addr: 203.12.12.233
+    bandwidth_down: 3512 kilobit
+    bandwidth_up: 3512 kilobit
+    processes:
+    - path: ~/.local/bin/tor
+      args: --Address relay84middle --Nickname relay84middle --defaults-torrc torrc-defaults
+        -f torrc
+      start_time: 5
+      expected_final_state: running
+    - path: ~/.local/bin/oniontrace
+      args: Mode=log TorControlPort=9051 LogLevel=info Events=BW,CIRC
+      start_time: 6
+      expected_final_state: running
+  relay85middle:
+    network_node_id: 1339
+    ip_addr: 83.43.100.26
+    bandwidth_down: 1328 kilobit
+    bandwidth_up: 1328 kilobit
+    processes:
+    - path: ~/.local/bin/tor
+      args: --Address relay85middle --Nickname relay85middle --defaults-torrc torrc-defaults
+        -f torrc
+      start_time: 5
+      expected_final_state: running
+    - path: ~/.local/bin/oniontrace
+      args: Mode=log TorControlPort=9051 LogLevel=info Events=BW,CIRC
+      start_time: 6
+      expected_final_state: running
+  relay86middle:
+    network_node_id: 1280
+    ip_addr: 130.61.30.37
+    bandwidth_down: 624 kilobit
+    bandwidth_up: 624 kilobit
+    processes:
+    - path: ~/.local/bin/tor
+      args: --Address relay86middle --Nickname relay86middle --defaults-torrc torrc-defaults
+        -f torrc
+      start_time: 5
+      expected_final_state: running
+    - path: ~/.local/bin/oniontrace
+      args: Mode=log TorControlPort=9051 LogLevel=info Events=BW,CIRC
+      start_time: 6
+      expected_final_state: running
+  server1exit:
+    network_node_id: 826
+    bandwidth_up: 100000000 kilobit
+    bandwidth_down: 100000000 kilobit
+    processes:
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-server.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  server2exit:
+    network_node_id: 686
+    bandwidth_up: 100000000 kilobit
+    bandwidth_down: 100000000 kilobit
+    processes:
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-server.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  server3exit:
+    network_node_id: 1815
+    bandwidth_up: 100000000 kilobit
+    bandwidth_down: 100000000 kilobit
+    processes:
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-server.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  server4exit:
+    network_node_id: 1815
+    bandwidth_up: 100000000 kilobit
+    bandwidth_down: 100000000 kilobit
+    processes:
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-server.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  server5exit:
+    network_node_id: 1815
+    bandwidth_up: 100000000 kilobit
+    bandwidth_down: 100000000 kilobit
+    processes:
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-server.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  server6exit:
+    network_node_id: 1297
+    bandwidth_up: 100000000 kilobit
+    bandwidth_down: 100000000 kilobit
+    processes:
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-server.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  server7exit:
+    network_node_id: 571
+    bandwidth_up: 100000000 kilobit
+    bandwidth_down: 100000000 kilobit
+    processes:
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-server.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  server8exit:
+    network_node_id: 1383
+    bandwidth_up: 100000000 kilobit
+    bandwidth_down: 100000000 kilobit
+    processes:
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-server.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  server9exit:
+    network_node_id: 356
+    bandwidth_up: 100000000 kilobit
+    bandwidth_down: 100000000 kilobit
+    processes:
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-server.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  server10exit:
+    network_node_id: 2286
+    bandwidth_up: 100000000 kilobit
+    bandwidth_down: 100000000 kilobit
+    processes:
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-server.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  perfclient1exit:
+    network_node_id: 1614
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  perfclient2exit:
+    network_node_id: 1878
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  perfclient3exit:
+    network_node_id: 2155
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  perfclient4exit:
+    network_node_id: 2359
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  perfclient5exit:
+    network_node_id: 2264
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  perfclient6exit:
+    network_node_id: 160
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  perfclient7exit:
+    network_node_id: 2359
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  perfclient8exit:
+    network_node_id: 1757
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  perfclient9exit:
+    network_node_id: 49
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  perfclient10exit:
+    network_node_id: 2359
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  perfclient11exit:
+    network_node_id: 82
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  perfclient12exit:
+    network_node_id: 2463
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  perfclient13exit:
+    network_node_id: 1650
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  perfclient14exit:
+    network_node_id: 2409
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  perfclient15exit:
+    network_node_id: 1184
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  perfclient16exit:
+    network_node_id: 768
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  perfclient17exit:
+    network_node_id: 813
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  perfclient18exit:
+    network_node_id: 89
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  perfclient19exit:
+    network_node_id: 1704
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  perfclient20exit:
+    network_node_id: 1015
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  perfclient21exit:
+    network_node_id: 2359
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  perfclient22exit:
+    network_node_id: 178
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  perfclient23exit:
+    network_node_id: 540
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  perfclient24exit:
+    network_node_id: 2359
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  perfclient25exit:
+    network_node_id: 2085
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  perfclient26exit:
+    network_node_id: 917
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  perfclient27exit:
+    network_node_id: 440
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  perfclient28exit:
+    network_node_id: 2359
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  perfclient29exit:
+    network_node_id: 2359
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  perfclient30exit:
+    network_node_id: 2463
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  perfclient31exit:
+    network_node_id: 2373
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  perfclient32exit:
+    network_node_id: 817
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  perfclient33exit:
+    network_node_id: 2359
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  perfclient34exit:
+    network_node_id: 236
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  perfclient35exit:
+    network_node_id: 296
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  perfclient36exit:
+    network_node_id: 1244
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  perfclient37exit:
+    network_node_id: 1090
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  perfclient38exit:
+    network_node_id: 1760
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  perfclient39exit:
+    network_node_id: 1297
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  perfclient40exit:
+    network_node_id: 1254
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  perfclient41exit:
+    network_node_id: 2359
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  perfclient42exit:
+    network_node_id: 1514
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  perfclient43exit:
+    network_node_id: 2359
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  perfclient44exit:
+    network_node_id: 1699
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  perfclient45exit:
+    network_node_id: 1444
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  perfclient46exit:
+    network_node_id: 1025
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  perfclient47exit:
+    network_node_id: 2359
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  perfclient48exit:
+    network_node_id: 2359
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  perfclient49exit:
+    network_node_id: 2359
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  perfclient50exit:
+    network_node_id: 2359
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  perfclient51exit:
+    network_node_id: 535
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  perfclient52exit:
+    network_node_id: 1411
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  perfclient53exit:
+    network_node_id: 2359
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  perfclient54exit:
+    network_node_id: 200
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  perfclient55exit:
+    network_node_id: 1905
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  perfclient56exit:
+    network_node_id: 2428
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  perfclient57exit:
+    network_node_id: 1937
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  perfclient58exit:
+    network_node_id: 1373
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  perfclient59exit:
+    network_node_id: 2359
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  perfclient60exit:
+    network_node_id: 1442
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  perfclient61exit:
+    network_node_id: 406
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  perfclient62exit:
+    network_node_id: 2359
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  perfclient63exit:
+    network_node_id: 1595
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  perfclient64exit:
+    network_node_id: 1243
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  perfclient65exit:
+    network_node_id: 1010
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  perfclient66exit:
+    network_node_id: 220
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  perfclient67exit:
+    network_node_id: 2359
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  perfclient68exit:
+    network_node_id: 1779
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  perfclient69exit:
+    network_node_id: 2393
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  perfclient70exit:
+    network_node_id: 2359
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  perfclient71exit:
+    network_node_id: 1025
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  perfclient72exit:
+    network_node_id: 177
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  perfclient73exit:
+    network_node_id: 2359
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  perfclient74exit:
+    network_node_id: 1090
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  perfclient75exit:
+    network_node_id: 1254
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  perfclient76exit:
+    network_node_id: 2197
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  perfclient77exit:
+    network_node_id: 1685
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  perfclient78exit:
+    network_node_id: 2264
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  perfclient79exit:
+    network_node_id: 22
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  perfclient80exit:
+    network_node_id: 427
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  perfclient81exit:
+    network_node_id: 1428
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  perfclient82exit:
+    network_node_id: 1782
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  perfclient83exit:
+    network_node_id: 2359
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  perfclient84exit:
+    network_node_id: 1025
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  perfclient85exit:
+    network_node_id: 2359
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  perfclient86exit:
+    network_node_id: 2359
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  perfclient87exit:
+    network_node_id: 2359
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  perfclient88exit:
+    network_node_id: 881
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  perfclient89exit:
+    network_node_id: 1757
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  perfclient90exit:
+    network_node_id: 2359
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  perfclient91exit:
+    network_node_id: 651
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  perfclient92exit:
+    network_node_id: 917
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  perfclient93exit:
+    network_node_id: 2359
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  perfclient94exit:
+    network_node_id: 2024
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  perfclient95exit:
+    network_node_id: 93
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  perfclient96exit:
+    network_node_id: 2371
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  perfclient97exit:
+    network_node_id: 2359
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  perfclient98exit:
+    network_node_id: 1682
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  perfclient99exit:
+    network_node_id: 1742
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  perfclient100exit:
+    network_node_id: 586
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  markovclient1exit:
+    network_node_id: 353
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  markovclient2exit:
+    network_node_id: 2317
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  markovclient3exit:
+    network_node_id: 1803
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  markovclient4exit:
+    network_node_id: 275
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  markovclient5exit:
+    network_node_id: 1963
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  markovclient6exit:
+    network_node_id: 1126
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  markovclient7exit:
+    network_node_id: 2385
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  markovclient8exit:
+    network_node_id: 2273
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  markovclient9exit:
+    network_node_id: 1161
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  markovclient10exit:
+    network_node_id: 1815
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  markovclient11exit:
+    network_node_id: 301
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  markovclient12exit:
+    network_node_id: 2022
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  markovclient13exit:
+    network_node_id: 1194
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  markovclient14exit:
+    network_node_id: 1702
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  markovclient15exit:
+    network_node_id: 453
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  markovclient16exit:
+    network_node_id: 8
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  markovclient17exit:
+    network_node_id: 1300
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  markovclient18exit:
+    network_node_id: 2098
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  markovclient19exit:
+    network_node_id: 1720
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  markovclient20exit:
+    network_node_id: 665
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  markovclient21exit:
+    network_node_id: 1285
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  markovclient22exit:
+    network_node_id: 918
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  markovclient23exit:
+    network_node_id: 1088
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  markovclient24exit:
+    network_node_id: 355
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  markovclient25exit:
+    network_node_id: 2229
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  markovclient26exit:
+    network_node_id: 646
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  markovclient27exit:
+    network_node_id: 604
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  markovclient28exit:
+    network_node_id: 1815
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  markovclient29exit:
+    network_node_id: 988
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  markovclient30exit:
+    network_node_id: 2169
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  markovclient31exit:
+    network_node_id: 1377
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  markovclient32exit:
+    network_node_id: 1158
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  markovclient33exit:
+    network_node_id: 1245
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  markovclient34exit:
+    network_node_id: 167
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  markovclient35exit:
+    network_node_id: 2169
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  markovclient36exit:
+    network_node_id: 1806
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  markovclient37exit:
+    network_node_id: 1701
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  markovclient38exit:
+    network_node_id: 1225
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  markovclient39exit:
+    network_node_id: 880
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  markovclient40exit:
+    network_node_id: 2183
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  markovclient41exit:
+    network_node_id: 1900
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  markovclient42exit:
+    network_node_id: 1197
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  markovclient43exit:
+    network_node_id: 92
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  markovclient44exit:
+    network_node_id: 1543
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  markovclient45exit:
+    network_node_id: 1881
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  markovclient46exit:
+    network_node_id: 309
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  markovclient47exit:
+    network_node_id: 1124
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  markovclient48exit:
+    network_node_id: 1096
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  markovclient49exit:
+    network_node_id: 477
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  markovclient50exit:
+    network_node_id: 492
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  markovclient51exit:
+    network_node_id: 362
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  markovclient52exit:
+    network_node_id: 2303
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  markovclient53exit:
+    network_node_id: 1312
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  markovclient54exit:
+    network_node_id: 1308
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  markovclient55exit:
+    network_node_id: 344
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  markovclient56exit:
+    network_node_id: 1786
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  markovclient57exit:
+    network_node_id: 454
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  markovclient58exit:
+    network_node_id: 1487
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  markovclient59exit:
+    network_node_id: 1435
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  markovclient60exit:
+    network_node_id: 524
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  markovclient61exit:
+    network_node_id: 994
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  markovclient62exit:
+    network_node_id: 1888
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  markovclient63exit:
+    network_node_id: 1854
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  markovclient64exit:
+    network_node_id: 639
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  markovclient65exit:
+    network_node_id: 2005
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  markovclient66exit:
+    network_node_id: 1848
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  markovclient67exit:
+    network_node_id: 2169
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  markovclient68exit:
+    network_node_id: 2241
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  markovclient69exit:
+    network_node_id: 726
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  markovclient70exit:
+    network_node_id: 995
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  markovclient71exit:
+    network_node_id: 1199
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  markovclient72exit:
+    network_node_id: 985
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  markovclient73exit:
+    network_node_id: 153
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  markovclient74exit:
+    network_node_id: 646
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  markovclient75exit:
+    network_node_id: 814
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  markovclient76exit:
+    network_node_id: 262
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  markovclient77exit:
+    network_node_id: 1856
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  markovclient78exit:
+    network_node_id: 125
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  markovclient79exit:
+    network_node_id: 1946
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  markovclient80exit:
+    network_node_id: 1839
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  markovclient81exit:
+    network_node_id: 503
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  markovclient82exit:
+    network_node_id: 823
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  markovclient83exit:
+    network_node_id: 347
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  markovclient84exit:
+    network_node_id: 806
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  markovclient85exit:
+    network_node_id: 1064
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  markovclient86exit:
+    network_node_id: 1658
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  markovclient87exit:
+    network_node_id: 1845
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  markovclient88exit:
+    network_node_id: 321
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  markovclient89exit:
+    network_node_id: 1536
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  markovclient90exit:
+    network_node_id: 1619
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  markovclient91exit:
+    network_node_id: 2313
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  markovclient92exit:
+    network_node_id: 809
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  markovclient93exit:
+    network_node_id: 1815
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  markovclient94exit:
+    network_node_id: 17
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  markovclient95exit:
+    network_node_id: 525
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  markovclient96exit:
+    network_node_id: 433
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  markovclient97exit:
+    network_node_id: 2296
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  markovclient98exit:
+    network_node_id: 731
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  markovclient99exit:
+    network_node_id: 728
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running
+  markovclient100exit:
+    network_node_id: 918
+    bandwidth_up: 1000000 kilobit
+    bandwidth_down: 1000000 kilobit
+    host_options:
+      pcap_enabled: true
+      pcap_capture_size: '65535'
+    processes:
+    - path: /opt/bin/arti
+      args:
+      - proxy
+      - -c=/mnt/tornet-0.01/conf/arti.common.toml
+      - -o=proxy.socks_listen="127.0.0.1:9050"
+      - --disable-fs-permission-checks
+      - -l=
+      environment:
+        RUST_BACKTRACE: '1'
+        OPENBLAS_NUM_THREADS: '1'
+        HOME: ./home
+      start_time: 15m
+      expected_final_state: running
+    - path: ~/.local/bin/tgen
+      args: ../../../conf/tgen-perf-exit.tgenrc.graphml
+      start_time: 300
+      expected_final_state: running

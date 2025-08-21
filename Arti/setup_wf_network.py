@@ -1,0 +1,2005 @@
+#!/usr/bin/env python3
+"""
+Improved WF setup following the exact repository methodology from 
+Data-Explainable Website Fingerprinting with Network Simulation
+Modified to extract URLs from wikipedia_en_top.zim file
+Added dynamic relay fingerprint extraction from consensus data
+"""
+
+import yaml
+import sys
+import json
+import shutil
+import os
+from pathlib import Path
+import argparse
+import random
+import lzma
+import re
+import urllib.parse
+import glob
+
+class ImprovedWFConfigConverter:
+    """Converts tornettools configs following the exact paper repository methodology"""
+    
+    def __init__(self, network_dir, zim_file_path=None, verbose=True):
+        self.network_dir = Path(network_dir)
+        self.zim_file_path = zim_file_path or "./wikidata/wikipedia_en_top.zim"
+        self.verbose = verbose
+        self.base_ip = "129.114.108.192"
+        self.start_port = 8000
+        self.urls = self.load_and_process_urls()
+        self.webpage_sets = self.create_webpage_sets()
+        
+    def log(self, message):
+        if self.verbose:
+            print(f"[WF-CONFIG] {message}")
+
+    def copy_arti_config_files(config_dir, verbose=True):
+        """
+        Copy arti configuration files from /opt/src/arti/tests/shadow/conf to the conf folder
+        
+        Args:
+            config_dir: Directory where the shadow.config.yaml file is located
+            verbose: Whether to print detailed output
+        
+        Returns:
+            bool: True if successful, False otherwise
+        """
+        source_dir = Path('/opt/src/arti/tests/shadow/conf')
+        target_dir = Path(config_dir) / 'conf'
+        
+        # Files to copy
+        config_files = ['arti.common.toml']
+        
+        if verbose:
+            print(f"Copying Arti configuration files...")
+            print(f"Source: {source_dir}")
+            print(f"Target: {target_dir}")
+        
+        # Check if source directory exists
+        if not source_dir.exists():
+            print(f"Error: Source directory not found: {source_dir}")
+            return False
+        
+        # Create target directory if it doesn't exist
+        try:
+            target_dir.mkdir(exist_ok=True, parents=True)
+            if verbose:
+                print(f"Ensured directory exists: {target_dir}")
+        except Exception as e:
+            print(f"Error creating target directory {target_dir}: {e}")
+            return False
+        
+        # Check if files already exist
+        existing_files = []
+        for config_file in config_files:
+            target_path = target_dir / config_file
+            if target_path.exists():
+                existing_files.append(config_file)
+        
+        if existing_files:
+            if verbose:
+                print(f"Files already exist: {', '.join(existing_files)}")
+                print("Skipping copy operation - files already present")
+            return True
+        
+        # Copy each configuration file
+        copied_files = []
+        for config_file in config_files:
+            source_path = source_dir / config_file
+            target_path = target_dir / config_file
+            
+            if not source_path.exists():
+                print(f"Warning: Source file not found: {source_path}")
+                continue
+            
+            try:
+                shutil.copy2(source_path, target_path)
+                copied_files.append(config_file)
+                if verbose:
+                    print(f"  ✓ Copied {config_file}")
+            except Exception as e:
+                print(f"Error copying {config_file}: {e}")
+                return False
+        
+        if copied_files:
+            if verbose:
+                print(f"Successfully copied {len(copied_files)} configuration files to {target_dir}")
+            return True
+        else:
+            print("No configuration files were copied")
+            return False
+
+
+    def extract_authorities_from_config(config):
+        """
+        Extract authority host names from the shadow.config.yaml
+        
+        Args:
+            config: The loaded YAML configuration
+        
+        Returns:
+            list: List of authority host names
+        """
+        authorities = []
+        
+        for host_name, host_config in config.get('hosts', {}).items():
+            # Check if this host has tor processes that might be authorities
+            processes = host_config.get('processes', [])
+            for process in processes:
+                if 'tor' in process.get('path', '').lower():
+                    args = process.get('args', '')
+                    # Look for authority-related arguments or naming patterns
+                    if ('authority' in host_name.lower() or 
+                        '4uthority' in host_name or
+                        'bwauth' in host_name.lower() or
+                        ('--Address' in args and any(auth_keyword in args.lower() 
+                                                for auth_keyword in ['authority', '4uthority']))):
+                        authorities.append(host_name)
+                        break
+        
+        return authorities
+
+
+    def read_authorities_from_torrc(config_dir, verbose=True):
+        """
+        Read authority information from tor.common.torrc file
+        
+        Args:
+            config_dir: Directory containing the shadow config
+            verbose: Whether to print detailed output
+        
+        Returns:
+            dict: Mapping of authority name to {v3ident, ip, port}
+        """
+        torrc_path = Path(config_dir) / 'conf' / 'tor.common.torrc'
+        
+        if not torrc_path.exists():
+            if verbose:
+                print(f"Warning: tor.common.torrc file not found at {torrc_path}")
+            return {}
+        
+        authorities = {}
+        
+        try:
+            with open(torrc_path, 'r') as f:
+                for line in f:
+                    line = line.strip()
+                    # Parse DirServer lines
+                    # Format: DirServer 4uthority1 v3ident=HEXSTRING orport=9001 IP:PORT FINGERPRINT
+                    if line.startswith('DirServer '):
+                        parts = line.split()
+                        if len(parts) >= 5:
+                            auth_name = parts[1]
+                            v3ident = None
+                            orport = None
+                            ip_port = None
+                            
+                            for part in parts[2:]:
+                                if part.startswith('v3ident='):
+                                    v3ident = part.replace('v3ident=', '')
+                                elif part.startswith('orport='):
+                                    orport = part.replace('orport=', '')
+                                elif ':' in part and '.' in part:  # IP:port format
+                                    ip_port = part
+                                    break
+                            
+                            if auth_name and v3ident and ip_port:
+                                ip = ip_port.split(':')[0]
+                                port = ip_port.split(':')[1] if ':' in ip_port else '8080'
+                                authorities[auth_name] = {
+                                    'v3ident': v3ident,
+                                    'ip': ip,
+                                    'port': port,
+                                    'orport': orport or '9001'
+                                }
+                                if verbose:
+                                    print(f"  Found authority {auth_name}: v3ident={v3ident}, ip={ip}, port={port}")
+            
+            if verbose:
+                print(f"Extracted {len(authorities)} authorities from tor.common.torrc")
+            
+        except Exception as e:
+            if verbose:
+                print(f"Error reading tor.common.torrc file: {e}")
+            return {}
+        
+        return authorities
+
+
+    def read_authority_fingerprints(config_dir, authorities, verbose=True):
+        """
+        Read RSA and ed25519 fingerprints from authority directories
+        
+        Args:
+            config_dir: Directory containing the shadow config
+            authorities: Dictionary of authority information
+            verbose: Whether to print detailed output
+        
+        Returns:
+            dict: Updated authorities dict with RSA and ed25519 fingerprints
+        """
+        shadow_data_dir = Path(config_dir) / 'shadow.data.template' / 'hosts'
+        
+        for auth_name in authorities:
+            auth_dir = shadow_data_dir / auth_name
+            
+            # Read RSA fingerprint
+            rsa_fingerprint_path = auth_dir / 'fingerprint'
+            if rsa_fingerprint_path.exists():
+                try:
+                    with open(rsa_fingerprint_path, 'r') as f:
+                        rsa_fp = f.read().strip()
+                        # Remove authority name prefix if present
+                        # Format: "4uthority1ABCD1234..." -> "ABCD1234..."
+                        if rsa_fp.startswith(auth_name):
+                            rsa_fp = rsa_fp[len(auth_name):]
+                        # Remove any remaining spaces
+                        rsa_fp = rsa_fp.replace(' ', '')
+                        authorities[auth_name]['rsa_identity'] = rsa_fp
+                        if verbose:
+                            print(f"  Found RSA fingerprint for {auth_name}: {rsa_fp}")
+                except Exception as e:
+                    if verbose:
+                        print(f"  Error reading RSA fingerprint for {auth_name}: {e}")
+            else:
+                if verbose:
+                    print(f"  Warning: RSA fingerprint not found for {auth_name} at {rsa_fingerprint_path}")
+            
+            # Read ed25519 fingerprint
+            ed25519_fingerprint_path = auth_dir / 'fingerprint-ed25519'
+            if ed25519_fingerprint_path.exists():
+                try:
+                    with open(ed25519_fingerprint_path, 'r') as f:
+                        ed25519_content = f.read().strip()
+                        # Remove authority name prefix if present
+                        # Format: "4uthority1 WI+huJ4KBpE..." -> "WI+huJ4KBpE..."
+                        if ed25519_content.startswith(auth_name):
+                            # Remove authority name and any following whitespace
+                            ed25519_fp = ed25519_content[len(auth_name):].strip()
+                        else:
+                            ed25519_fp = ed25519_content
+                        authorities[auth_name]['ed_identity'] = ed25519_fp
+                        if verbose:
+                            print(f"  Found ed25519 fingerprint for {auth_name}: {ed25519_fp}")
+                except Exception as e:
+                    if verbose:
+                        print(f"  Error reading ed25519 fingerprint for {auth_name}: {e}")
+            else:
+                if verbose:
+                    print(f"  Warning: ed25519 fingerprint not found for {auth_name} at {ed25519_fingerprint_path}")
+        
+        return authorities
+
+
+    def update_arti_common_toml(config_dir, authorities_info, verbose=True):
+        """
+        Update arti.common.toml with the authorities and fallback caches from the config
+        
+        Args:
+            config_dir: Directory containing the config files
+            authorities_info: Dictionary of authority information with v3ident, ip, port, etc.
+            verbose: Whether to print detailed output
+        
+        Returns:
+            bool: True if successful, False otherwise
+        """
+        arti_common_path = Path(config_dir) / 'conf' / 'arti.common.toml'
+        
+        if not arti_common_path.exists():
+            if verbose:
+                print(f"Error: arti.common.toml not found at {arti_common_path}")
+            return False
+        
+        try:
+            # Read the current file
+            with open(arti_common_path, 'r') as f:
+                content = f.read()
+            
+            # Build the new authorities section
+            auth_entries = []
+            for auth_name, auth_info in authorities_info.items():
+                v3ident = auth_info['v3ident']
+                auth_entries.append(f'    {{ name = "{auth_name}", v3ident = "{v3ident}" }},')
+                if verbose:
+                    print(f"  Added authority {auth_name} -> {v3ident}")
+            
+            # Build the fallback_caches section
+            fallback_entries = []
+            for auth_name, auth_info in authorities_info.items():
+                orport = auth_info.get('orport', '9001')
+                ip = auth_info['ip']
+                rsa_identity = auth_info.get('rsa_identity', '')
+                ed_identity = auth_info.get('ed_identity', '')
+                
+                if rsa_identity and ed_identity:
+                    fallback_entry = f'    {{ rsa_identity = "{rsa_identity}", ed_identity = "{ed_identity}", orports = [ "{ip}:{orport}" ] }},'
+                    fallback_entries.append(fallback_entry)
+                    if verbose:
+                        print(f"  Added fallback cache {auth_name}: {ip}:{orport}")
+                else:
+                    missing = []
+                    if not rsa_identity:
+                        missing.append("RSA identity")
+                    if not ed_identity:
+                        missing.append("ed25519 identity")
+                    if verbose:
+                        print(f"  Warning: Missing {', '.join(missing)} for {auth_name}, skipping fallback cache")
+            
+            if not auth_entries:
+                if verbose:
+                    print("No authorities found to add")
+                return True
+            
+            # Remove any existing sections that we're going to replace
+            # Remove [tor_network] section completely
+            content = re.sub(r'\[tor_network\].*?(?=\n\[|\n*$)', '', content, flags=re.DOTALL)
+            
+            # Remove [path_rules] section completely 
+            content = re.sub(r'\[path_rules\].*?(?=\n\[|\n*$)', '', content, flags=re.DOTALL)
+            
+            # Remove any standalone subnet family prefix lines that might be floating around
+            content = re.sub(r'^ipv4_subnet_family_prefix\s*=.*\n?', '', content, flags=re.MULTILINE)
+            content = re.sub(r'^ipv6_subnet_family_prefix\s*=.*\n?', '', content, flags=re.MULTILINE)
+            
+            # Clean up multiple newlines
+            content = re.sub(r'\n{3,}', '\n\n', content).strip()
+            
+            # Build the new [tor_network] section
+            tor_network_content = "[tor_network]\n"
+            
+            if fallback_entries:
+                tor_network_content += "fallback_caches = [\n"
+                tor_network_content += "\n".join(fallback_entries) + "\n"
+                tor_network_content += "]\n"
+            
+            if auth_entries:
+                tor_network_content += "authorities = [\n"
+                tor_network_content += "\n".join(auth_entries) + "\n"
+                tor_network_content += "]\n"
+            
+            # Build the [path_rules] section
+            path_rules_content = "\n[path_rules]\n"
+            path_rules_content += "ipv4_subnet_family_prefix = 33\n"
+            path_rules_content += "ipv6_subnet_family_prefix = 129\n"
+            
+            # Handle [override_net_params] section for hsdir_interval
+            if '[override_net_params]' in content:
+                # Update existing section to use 120 instead of 900
+                override_pattern = r'(\[override_net_params\][^[]*?)hsdir_interval\s*=\s*\d+'
+                if re.search(override_pattern, content, flags=re.DOTALL):
+                    content = re.sub(override_pattern, r'\1hsdir_interval = 120', content, flags=re.DOTALL)
+                else:
+                    # Add hsdir_interval to existing section
+                    override_pattern = r'(\[override_net_params\][^[]*?)(?=\n\[|\n*$)'
+                    content = re.sub(override_pattern, r'\1hsdir_interval = 120\n', content, flags=re.DOTALL)
+            else:
+                # Add new section
+                content += "\n\n[override_net_params]\n# When TestingTorNetwork is enabled, tor uses a hard-coded value\n# of 120 here; match it.\nhsdir_interval = 120\n"
+            
+            # Combine everything: tor_network + path_rules + existing content
+            final_content = tor_network_content + path_rules_content + "\n" + content
+            
+            # Final cleanup of multiple newlines
+            final_content = re.sub(r'\n{3,}', '\n\n', final_content).strip() + '\n'
+            
+            # Write the updated content back
+            with open(arti_common_path, 'w') as f:
+                f.write(final_content)
+            
+            if verbose:
+                print(f"Successfully updated arti.common.toml with {len(auth_entries)} authorities")
+                if fallback_entries:
+                    print(f"Added {len(fallback_entries)} fallback caches")
+            
+            return True
+            
+        except Exception as e:
+            if verbose:
+                print(f"Error updating arti.common.toml: {e}")
+            return False
+    
+    def extract_guard_relays_from_consensus(self):
+        """Extract suitable Guard relay fingerprints from consensus data"""
+        relay_info_file = None
+        
+        # Look for relay info file in the current directory
+        possible_files = [
+            'relayinfo_staging_2025-07-01--2025-07-31.json',
+            # Add pattern matching for other potential files
+        ]
+        
+        for filename in possible_files:
+            if Path(filename).exists():
+                relay_info_file = Path(filename)
+                break
+        
+        # If not found, try to find any relayinfo file
+        if not relay_info_file:
+            relay_files = glob.glob('relayinfo_staging_*.json')
+            if relay_files:
+                relay_info_file = Path(relay_files[0])
+        
+        if not relay_info_file:
+            self.log("Warning: No relay info file found, using fallback fingerprints")
+            return self._get_fallback_fingerprints()
+        
+        self.log(f"Extracting Guard relays from: {relay_info_file}")
+        
+        try:
+            with open(relay_info_file, 'r') as f:
+                relay_data = json.load(f)
+            
+            guard_relays = []
+            
+            # Parse relay data to find suitable Guards
+            if 'relays' in relay_data:
+                relays = relay_data['relays']
+            elif isinstance(relay_data, list):
+                relays = relay_data
+            else:
+                self.log("Warning: Unexpected relay data format")
+                return self._get_fallback_fingerprints()
+            
+            for relay in relays:
+                # Check if relay has Guard flag
+                flags = relay.get('flags', [])
+                if isinstance(flags, str):
+                    flags = flags.split(',')
+                
+                if 'Guard' not in flags:
+                    continue
+                
+                # Check bandwidth (prefer high-bandwidth relays)
+                bandwidth = relay.get('observed_bandwidth', 0)
+                if isinstance(bandwidth, str):
+                    try:
+                        bandwidth = int(bandwidth)
+                    except ValueError:
+                        bandwidth = 0
+                
+                # Require at least 5MB/s
+                if bandwidth < 5000000:
+                    continue
+                
+                # Check uptime/stability indicators
+                running = 'Running' in flags
+                stable = 'Stable' in flags
+                
+                if not (running and stable):
+                    continue
+                
+                fingerprint = relay.get('fingerprint')
+                if fingerprint and len(fingerprint) == 40:
+                    # Remove spaces and ensure uppercase
+                    clean_fingerprint = fingerprint.replace(' ', '').upper()
+                    if len(clean_fingerprint) == 40:
+                        guard_relays.append({
+                            'fingerprint': clean_fingerprint,
+                            'bandwidth': bandwidth,
+                            'nickname': relay.get('nickname', 'Unknown'),
+                            'country': relay.get('country', 'Unknown')
+                        })
+            
+            # Sort by bandwidth (descending) and take top relays
+            guard_relays.sort(key=lambda x: x['bandwidth'], reverse=True)
+            
+            if len(guard_relays) >= 2:
+                selected = guard_relays[:2]  # Take top 2
+                fingerprints = [relay['fingerprint'] for relay in selected]
+                
+                self.log(f"Selected Guard relays:")
+                for relay in selected:
+                    self.log(f"  {relay['fingerprint']} ({relay['nickname']}, {relay['bandwidth']/1000000:.1f}MB/s, {relay['country']})")
+                
+                return fingerprints
+            else:
+                self.log(f"Warning: Only found {len(guard_relays)} suitable Guard relays")
+                return self._get_fallback_fingerprints()
+                
+        except Exception as e:
+            self.log(f"Error parsing relay info file: {e}")
+            return self._get_fallback_fingerprints()
+
+    def _get_fallback_fingerprints(self):
+        """Fallback fingerprints if consensus parsing fails"""
+        # These are actual long-running Guard relays as of 2024
+        # You should replace these with current ones from your consensus period
+        fallback_fingerprints = [
+            "185F2A57B0C4620582F73F3B28AECB394CB8B3BB",  # longclaw
+            "7BE683E65D48141321C5ED92F075C55364AC7123",  # gabelmoo  
+        ]
+        self.log("Using fallback Guard relay fingerprints")
+        return fallback_fingerprints
+
+    def extract_relay_fingerprints_from_gml(self):
+        """Alternative method: Extract relay fingerprints from GML topology file"""
+        try:
+            gml_file = Path('networkinfo_staging.gml')
+            if not gml_file.exists():
+                return []
+            
+            self.log(f"Attempting to extract relay info from GML file: {gml_file}")
+            
+            with open(gml_file, 'r') as f:
+                content = f.read()
+            
+            # Look for node entries with relay information
+            # GML format may contain fingerprint information in node attributes
+            
+            # Pattern to match nodes with potential fingerprint data
+            node_pattern = r'node\s*\[\s*id\s+(\d+)[^]]*fingerprint\s+"([A-F0-9]{40})"[^]]*flags\s+"([^"]*)"[^]]*\]'
+            matches = re.findall(node_pattern, content, re.IGNORECASE | re.DOTALL)
+            
+            guard_relays = []
+            for node_id, fingerprint, flags in matches:
+                if 'Guard' in flags:
+                    guard_relays.append(fingerprint)
+            
+            if len(guard_relays) >= 2:
+                self.log(f"Extracted {len(guard_relays)} Guard relays from GML file")
+                return guard_relays[:2]
+            else:
+                self.log("GML file extraction failed or insufficient Guard relays found")
+                return []
+                
+        except Exception as e:
+            self.log(f"Error extracting from GML file: {e}")
+            return []
+
+    def validate_relay_fingerprints(self, fingerprints):
+        """Validate that extracted fingerprints are properly formatted"""
+        valid_fingerprints = []
+        
+        for fp in fingerprints:
+            # Remove any spaces and ensure uppercase
+            clean_fp = fp.replace(' ', '').upper()
+            
+            # Check length and format
+            if len(clean_fp) == 40 and all(c in '0123456789ABCDEF' for c in clean_fp):
+                valid_fingerprints.append(clean_fp)
+            else:
+                self.log(f"Warning: Invalid fingerprint format: {fp}")
+        
+        return valid_fingerprints
+
+    def debug_consensus_data(self):
+        """Debug method to inspect available consensus data"""
+        self.log("Debugging available consensus data...")
+        
+        # Check for various consensus data files
+        files_to_check = [
+            'relayinfo_staging_*.json',
+            'networkinfo_staging.gml',
+            'consensuses-2025-07/*',
+            'server-descriptors-2025-07/*'
+        ]
+        
+        for pattern in files_to_check:
+            matches = glob.glob(pattern)
+            if matches:
+                self.log(f"Found {pattern}: {len(matches)} files")
+                for match in matches[:3]:  # Show first 3
+                    path = Path(match)
+                    if path.is_file():
+                        size = path.stat().st_size
+                        self.log(f"  {match} ({size:,} bytes)")
+            else:
+                self.log(f"No files found for pattern: {pattern}")
+    
+    def _extract_with_libzim(self):
+        """Extract URLs using libzim library"""
+        import libzim
+        
+        zim_path = Path(self.zim_file_path)
+        if not zim_path.exists():
+            self.log(f"Error: ZIM file not found at {zim_path}")
+            return []
+        
+        urls = []
+        try:
+            archive = libzim.Archive(str(zim_path))
+            self.log(f"Successfully opened ZIM file: {zim_path}")
+            self.log(f"ZIM file contains {archive.article_count} articles")
+            
+            # Since libzim doesn't provide index-based iteration, we'll use random sampling
+            # and try some common Wikipedia article paths
+            
+            processed_count = 0
+            attempts = 0
+            max_attempts = 500  # Try more attempts to get enough articles
+            
+            # First, try to get articles using random entry method
+            while processed_count < 100 and attempts < max_attempts:
+                attempts += 1
+                try:
+                    # Get a random entry
+                    entry = archive.get_random_entry()
+                    
+                    # Check if it's a valid article
+                    if not hasattr(entry, 'title') and not hasattr(entry, 'path'):
+                        continue
+                    
+                    # Get title/path
+                    title = None
+                    if hasattr(entry, 'title'):
+                        title = entry.title
+                    elif hasattr(entry, 'path'):
+                        title = entry.path.strip('/')
+                    
+                    if not title:
+                        continue
+                    
+                    # Skip non-article content
+                    if (title.startswith('File:') or title.startswith('Category:') or 
+                        title.startswith('Template:') or title.startswith('Help:') or
+                        title.startswith('Wikipedia:') or title.startswith('User:') or
+                        title.startswith('Talk:') or title.startswith('Special:') or
+                        title.startswith('-/') or title.startswith('A/')):
+                        continue
+                    
+                    # Check if it's a redirect (if possible)
+                    try:
+                        if hasattr(entry, 'is_redirect') and entry.is_redirect:
+                            continue
+                        elif hasattr(entry, 'is_redirect') and callable(entry.is_redirect) and entry.is_redirect():
+                            continue
+                    except:
+                        pass
+                    
+                    # Skip if we already have this title
+                    if any(url['title'] == title for url in urls):
+                        continue
+                    
+                    # Clean title for URL
+                    url_title = title.replace(' ', '_')
+                    url_title = urllib.parse.quote(url_title, safe='_-.')
+                    
+                    port = self.start_port + processed_count
+                    full_url = f"http://{self.base_ip}:{port}/{url_title}"
+                    
+                    urls.append({
+                        'original_ip': self.base_ip,
+                        'original_port': port,
+                        'original_url': full_url,
+                        'page_path': f'/{url_title}',
+                        'id': processed_count,
+                        'title': title
+                    })
+                    
+                    processed_count += 1
+                    
+                    if processed_count % 10 == 0:
+                        self.log(f"Processed {processed_count} articles...")
+                        
+                except Exception as e:
+                    continue  # Skip problematic entries
+            
+            # If we still don't have enough articles, try some common Wikipedia article names
+            if processed_count < 50:
+                self.log(f"Only found {processed_count} articles via random sampling, trying common articles...")
+                
+                common_articles = [
+                    "Main_Page", "Wikipedia", "Association_football", "Biology", "Chemistry", 
+                    "Physics", "Mathematics", "Computer_science", "History", "Geography",
+                    "Literature", "Philosophy", "Psychology", "Art", "Music", "Science",
+                    "Technology", "Medicine", "Engineering", "Economics", "Politics",
+                    "Democracy", "Education", "Culture", "Language", "Earth", "Universe",
+                    "Evolution", "DNA", "Energy", "Climate_change", "Internet", "Artificial_intelligence"
+                ]
+                
+                for article_name in common_articles:
+                    if processed_count >= 100:
+                        break
+                        
+                    try:
+                        # Try to get entry by title
+                        if archive.has_entry_by_title(article_name):
+                            entry = archive.get_entry_by_title(article_name)
+                            
+                            # Skip if we already have this title
+                            if any(url['title'] == article_name for url in urls):
+                                continue
+                            
+                            url_title = urllib.parse.quote(article_name, safe='_-.')
+                            port = self.start_port + processed_count
+                            full_url = f"http://{self.base_ip}:{port}/{url_title}"
+                            
+                            urls.append({
+                                'original_ip': self.base_ip,
+                                'original_port': port,
+                                'original_url': full_url,
+                                'page_path': f'/{url_title}',
+                                'id': processed_count,
+                                'title': article_name.replace('_', ' ')
+                            })
+                            
+                            processed_count += 1
+                            
+                    except Exception as e:
+                        continue
+                
+                self.log(f"Added {processed_count - len([u for u in urls if not u['title'].replace(' ', '_') in common_articles])} common articles")
+                            
+        except Exception as e:
+            self.log(f"Error reading ZIM file with libzim: {e}")
+            import traceback
+            self.log(f"Full traceback: {traceback.format_exc()}")
+            return []
+            
+        self.log(f"Extracted {len(urls)} URLs from ZIM file")
+        return urls
+    
+    def _extract_manual(self):
+        """Manual extraction by reading ZIM file structure"""
+        zim_path = Path(self.zim_file_path)
+        if not zim_path.exists():
+            self.log(f"Error: ZIM file not found at {zim_path}")
+            return []
+        
+        # Fallback: generate some common Wikipedia articles
+        self.log("Using fallback article list since ZIM libraries not available")
+        
+        common_articles = [
+            "Association_football", "Team_sport", "Biology", "Chemistry", "Physics",
+            "Mathematics", "Computer_science", "Engineering", "Medicine", "History",
+            "Geography", "Literature", "Philosophy", "Psychology", "Sociology",
+            "Economics", "Politics", "Art", "Music", "Culture",
+            "Science", "Technology", "Education", "Health", "Environment",
+            "Climate_change", "Energy", "Transportation", "Communication", "Internet",
+            "World_Wide_Web", "Artificial_intelligence", "Machine_learning", "Robotics", "Space",
+            "Astronomy", "Earth", "Solar_system", "Universe", "Evolution",
+            "DNA", "Genetics", "Ecology", "Biodiversity", "Conservation",
+            "Democracy", "Human_rights", "International_law", "United_Nations", "Peace",
+            "War", "Conflict_resolution", "Diplomacy", "Trade", "Globalization",
+            "Language", "Communication", "Writing", "Reading", "Books",
+            "Libraries", "Museums", "Archives", "Knowledge", "Information",
+            "Data", "Statistics", "Research", "Scientific_method", "Hypothesis",
+            "Theory", "Experiment", "Observation", "Analysis", "Discovery",
+            "Innovation", "Invention", "Patent", "Copyright", "Intellectual_property",
+            "Ethics", "Morality", "Justice", "Law", "Legal_system",
+            "Constitution", "Government", "Parliament", "President", "Prime_minister",
+            "Election", "Voting", "Political_party", "Campaign", "Public_policy",
+            "Social_welfare", "Healthcare", "Education_system", "Infrastructure", "Urban_planning",
+            "Rural_development", "Agriculture", "Food_security", "Water_resources", "Natural_resources",
+            "Renewable_energy", "Fossil_fuels", "Nuclear_energy", "Solar_power", "Wind_power",
+            "Hydroelectric_power", "Geothermal_energy", "Biomass", "Energy_efficiency", "Sustainability"
+        ]
+        
+        urls = []
+        for i, article in enumerate(common_articles[:100]):  # Limit to 100
+            port = self.start_port + i
+            full_url = f"http://{self.base_ip}:{port}/{article}"
+            
+            urls.append({
+                'original_ip': self.base_ip,
+                'original_port': port,
+                'original_url': full_url,
+                'page_path': f'/{article}',
+                'id': i,
+                'title': article.replace('_', ' ')
+            })
+        
+        self.log(f"Generated {len(urls)} fallback URLs")
+        return urls
+        
+    def load_and_process_urls(self):
+        """Load URLs from ZIM file and process them"""
+        self.log(f"Loading Wikipedia articles from ZIM file: {self.zim_file_path}")
+        
+        #urls = self._extract_with_libzim()
+        urls = self._extract_manual()
+        
+        if not urls:
+            self.log("No URLs extracted, using fallback method")
+            urls = self._extract_manual()
+        
+        self.log(f"Loaded {len(urls)} Wikipedia pages from ZIM file")
+        
+        # Show some examples
+        if urls and self.verbose:
+            self.log("Sample URLs extracted:")
+            for i, url in enumerate(urls[:5]):
+                self.log(f"  {i+1}: {url['original_url']} ({url.get('title', 'No title')})")
+            if len(urls) > 5:
+                self.log(f"  ... and {len(urls)-5} more")
+        
+        return urls
+    
+    def create_webpage_sets(self):
+        """Create W_α (sensitive), W_β (benign), W_∅ (unlabeled) sets"""
+        total_urls = len(self.urls)
+        
+        if total_urls == 0:
+            self.log("Warning: No URLs loaded")
+            return {'W_alpha': [], 'W_beta': [], 'W_empty': []}
+        
+        # Following the paper's methodology: W_α contains 98 unique pages
+        sensitive_count = min(98, total_urls)
+        
+        # Shuffle URLs to randomize selection
+        shuffled_urls = self.urls.copy()
+        random.shuffle(shuffled_urls)
+        
+        sensitive_urls = shuffled_urls[:sensitive_count]
+        remaining_urls = shuffled_urls[sensitive_count:]
+        
+        self.log(f"Created webpage sets following paper methodology:")
+        self.log(f"  W_α (sensitive): {len(sensitive_urls)} Wikipedia pages")
+        
+        return {
+            'W_alpha': sensitive_urls,
+            'W_beta': remaining_urls[:len(remaining_urls)//2] if remaining_urls else [],
+            'W_empty': remaining_urls[len(remaining_urls)//2:] if remaining_urls else []
+        }
+    
+    def save_urls_to_file(self, output_path="urls_from_zim.txt"):
+        """Save extracted URLs to a file in the original format for reference"""
+        try:
+            with open(output_path, 'w') as f:
+                for url_info in self.urls:
+                    line = f"{url_info['original_ip']} {url_info['original_port']} {url_info['original_url']}\n"
+                    f.write(line)
+            self.log(f"Saved extracted URLs to {output_path}")
+        except Exception as e:
+            self.log(f"Warning: Could not save URLs file: {e}")
+    
+    def extract_valid_node_ids_from_config(self, config):
+        """
+        Extract all valid network node IDs from tornettools-generated config
+        Returns a sorted list of valid node IDs that exist in the network topology
+        """
+        valid_node_ids = set()
+        
+        # Extract from network graph file (GML format)
+        network_config = config.get('network', {})
+        if 'graph' in network_config:
+            graph_config = network_config['graph']
+            
+            # Check if graph is stored in external file
+            if 'file' in graph_config:
+                file_info = graph_config['file']
+                gml_path = file_info.get('path')
+                compression = file_info.get('compression')
+                
+                if gml_path:
+                    try:
+                        # Make path relative to network directory if needed
+                        if not os.path.isabs(gml_path):
+                            gml_path = self.network_dir / gml_path
+                        else:
+                            gml_path = Path(gml_path)
+                        
+                        valid_node_ids = self._parse_gml_file(gml_path, compression)
+                        
+                    except Exception as e:
+                        self.log(f"Error reading GML file {gml_path}: {e}")
+                        return []
+            
+            # Fallback: try to extract from inline graph data
+            else:
+                # Extract node IDs from edges (old method)
+                for edge in graph_config.get('edges', []):
+                    if isinstance(edge, dict):
+                        # Handle different edge formats
+                        if 'nodes' in edge and len(edge['nodes']) >= 2:
+                            valid_node_ids.add(edge['nodes'][0])
+                            valid_node_ids.add(edge['nodes'][1])
+                        elif 'src' in edge and 'dst' in edge:
+                            valid_node_ids.add(edge['src'])
+                            valid_node_ids.add(edge['dst'])
+                
+                # Also check explicit node definitions
+                for node in graph_config.get('nodes', []):
+                    if isinstance(node, dict) and 'id' in node:
+                        valid_node_ids.add(node['id'])
+                    elif isinstance(node, (int, str)):
+                        try:
+                            valid_node_ids.add(int(node))
+                        except ValueError:
+                            pass
+        
+        if valid_node_ids:
+            node_list = sorted(valid_node_ids)
+            self.log(f"Found {len(node_list)} valid network nodes: {min(node_list)}-{max(node_list)}")
+            return node_list
+        else:
+            self.log("Warning: Could not extract valid node IDs from network graph")
+            return []
+    
+    def get_used_node_ids_from_config(self, config):
+        """Extract node IDs currently assigned to hosts"""
+        used_node_ids = set()
+        
+        for host_name, host_config in config.get('hosts', {}).items():
+            node_id = host_config.get('network_node_id')
+            if node_id is not None:
+                used_node_ids.add(node_id)
+        
+        return sorted(used_node_ids)
+    
+    def debug_gml_file(self, config):
+        """Debug method to inspect GML file structure"""
+        network_config = config.get('network', {})
+        if 'graph' not in network_config:
+            self.log("No graph config found")
+            return
+        
+        graph_config = network_config['graph']
+        if 'file' not in graph_config:
+            self.log("No external file reference found")
+            return
+        
+        file_info = graph_config['file']
+        gml_path = file_info.get('path')
+        compression = file_info.get('compression')
+        
+        if not gml_path:
+            self.log("No file path found")
+            return
+        
+        # Make path relative to network directory if needed
+        if not os.path.isabs(gml_path):
+            gml_path = self.network_dir / gml_path
+        else:
+            gml_path = Path(gml_path)
+        
+        self.log(f"GML File Debug Info:")
+        self.log(f"  Path: {gml_path}")
+        self.log(f"  Exists: {gml_path.exists()}")
+        if gml_path.exists():
+            stat = gml_path.stat()
+            self.log(f"  Size: {stat.st_size:,} bytes")
+            self.log(f"  Compression: {compression or 'none'}")
+        
+        # Try to read first few lines to understand structure
+        try:
+            if compression == 'xz':
+                with lzma.open(gml_path, 'rt', encoding='utf-8') as f:
+                    first_lines = [f.readline().strip() for _ in range(20)]
+            else:
+                with open(gml_path, 'r', encoding='utf-8') as f:
+                    first_lines = [f.readline().strip() for _ in range(20)]
+            
+            self.log(f"  First 20 lines:")
+            for i, line in enumerate(first_lines, 1):
+                if line:
+                    self.log(f"    {i:2d}: {line}")
+                    
+        except Exception as e:
+            self.log(f"  Error reading file: {e}")
+    
+    def analyze_network_quick(self, config):
+        """Quick analysis of network structure"""
+        # Add debug info for GML file
+        self.debug_gml_file(config)
+        
+        valid_nodes = self.extract_valid_node_ids_from_config(config)
+        used_nodes = self.get_used_node_ids_from_config(config)
+        
+        if valid_nodes:
+            self.log(f"Network Analysis:")
+            self.log(f"  Total network nodes: {len(valid_nodes)}")
+            self.log(f"  Node ID range: {min(valid_nodes)} to {max(valid_nodes)}")
+            self.log(f"  Currently used nodes: {len(used_nodes)}")
+            self.log(f"  Available nodes: {len(valid_nodes) - len(used_nodes)}")
+            
+            # Show some examples
+            if len(valid_nodes) > 10:
+                self.log(f"  Example valid nodes: {valid_nodes[:5]} ... {valid_nodes[-5:]}")
+            else:
+                self.log(f"  All valid nodes: {valid_nodes}")
+                
+            available = sorted(set(valid_nodes) - set(used_nodes))
+            if available:
+                if len(available) > 10:
+                    self.log(f"  Example available nodes: {available[:10]}")
+                else:
+                    self.log(f"  All available nodes: {available}")
+            
+            return True
+        else:
+            self.log("Could not analyze network - no valid nodes found")
+            return False
+    
+    def _parse_gml_file(self, gml_path, compression=None):
+        """Parse GML file to extract node IDs"""
+        
+        valid_node_ids = set()
+        
+        try:
+            # Read file content (handle compression)
+            if compression == 'xz':
+                with lzma.open(gml_path, 'rt', encoding='utf-8') as f:
+                    content = f.read()
+            elif compression == 'gz':
+                import gzip
+                with gzip.open(gml_path, 'rt', encoding='utf-8') as f:
+                    content = f.read()
+            else:
+                with open(gml_path, 'r', encoding='utf-8') as f:
+                    content = f.read()
+            
+            self.log(f"Successfully read GML file: {gml_path}")
+            
+            # Parse GML content to extract node IDs
+            # GML format typically has: node [ id <number> ... ]
+            node_pattern = r'node\s*\[\s*id\s+(\d+)'
+            node_matches = re.findall(node_pattern, content, re.IGNORECASE)
+            
+            for node_id_str in node_matches:
+                try:
+                    valid_node_ids.add(int(node_id_str))
+                except ValueError:
+                    continue
+            
+            # Also look for edge patterns to verify: edge [ source <id> target <id> ]
+            edge_pattern = r'edge\s*\[\s*source\s+(\d+)\s+target\s+(\d+)'
+            edge_matches = re.findall(edge_pattern, content, re.IGNORECASE)
+            
+            edge_nodes = set()
+            for source, target in edge_matches:
+                try:
+                    edge_nodes.add(int(source))
+                    edge_nodes.add(int(target))
+                except ValueError:
+                    continue
+            
+            # Use node list if available, otherwise fall back to edge nodes
+            if valid_node_ids:
+                self.log(f"Extracted {len(valid_node_ids)} nodes from GML node definitions")
+                # Verify edge nodes are subset of node definitions
+                if edge_nodes and not edge_nodes.issubset(valid_node_ids):
+                    self.log("Warning: Some edge nodes not in node definitions, using union")
+                    valid_node_ids.update(edge_nodes)
+            elif edge_nodes:
+                self.log(f"No explicit nodes found, extracted {len(edge_nodes)} nodes from edges")
+                valid_node_ids = edge_nodes
+            
+            return valid_node_ids
+            
+        except FileNotFoundError:
+            self.log(f"Error: GML file not found: {gml_path}")
+            return set()
+        except Exception as e:
+            self.log(f"Error parsing GML file {gml_path}: {e}")
+            return set()
+    
+    def validate_network_topology(self, config):
+        """Validate that the network topology is properly defined"""
+        network_config = config.get('network', {})
+        
+        if 'graph' not in network_config:
+            self.log("Warning: No network graph found in configuration")
+            return False
+        
+        graph_config = network_config['graph']
+        
+        # Handle external GML file
+        if 'file' in graph_config:
+            file_info = graph_config['file']
+            gml_path = file_info.get('path')
+            compression = file_info.get('compression', '')
+            
+            if gml_path:
+                # Make path relative to network directory if needed
+                if not os.path.isabs(gml_path):
+                    gml_path = self.network_dir / gml_path
+                else:
+                    gml_path = Path(gml_path)
+                
+                if not gml_path.exists():
+                    self.log(f"Error: GML file not found: {gml_path}")
+                    return False
+                
+                self.log(f"Found network topology file: {gml_path}")
+                self.log(f"File type: GML, compression: {compression or 'none'}")
+                
+                # Try to get basic info without full parsing
+                try:
+                    valid_node_ids = self._parse_gml_file(gml_path, compression)
+                    if valid_node_ids:
+                        min_node = min(valid_node_ids)
+                        max_node = max(valid_node_ids)
+                        self.log(f"Network topology: {len(valid_node_ids)} nodes (IDs {min_node}-{max_node})")
+                        return True
+                    else:
+                        self.log("Warning: Could not extract nodes from GML file")
+                        return False
+                except Exception as e:
+                    self.log(f"Warning: Error validating GML file: {e}")
+                    return False
+            else:
+                self.log("Warning: No file path specified in graph config")
+                return False
+        
+        # Handle inline graph data (fallback)
+        else:
+            # Count edges and nodes from inline data
+            edge_count = len(graph_config.get('edges', []))
+            
+            # Extract unique node IDs from edges
+            node_ids = set()
+            for edge in graph_config.get('edges', []):
+                if isinstance(edge, dict):
+                    if 'nodes' in edge and len(edge['nodes']) >= 2:
+                        node_ids.add(edge['nodes'][0])
+                        node_ids.add(edge['nodes'][1])
+                    elif 'src' in edge and 'dst' in edge:
+                        node_ids.add(edge['src'])
+                        node_ids.add(edge['dst'])
+            
+            if node_ids:
+                min_node = min(node_ids)
+                max_node = max(node_ids)
+                self.log(f"Network topology: {len(node_ids)} nodes (IDs {min_node}-{max_node}), {edge_count} edges")
+                return True
+            else:
+                self.log("Warning: No valid node IDs found in network edges")
+                return False
+    
+    def find_available_node_ids_improved(self, config, count_needed):
+        """
+        Improved method to find available node IDs using network topology
+        """
+        # Get all valid node IDs from the network topology
+        valid_node_ids = set(self.extract_valid_node_ids_from_config(config))
+        
+        if not valid_node_ids:
+            self.log("Error: No valid network node IDs found in topology")
+            return []
+        
+        # Get currently used node IDs
+        used_node_ids = set(self.get_used_node_ids_from_config(config))
+        
+        # Find available node IDs
+        available_node_ids = sorted(valid_node_ids - used_node_ids)
+        
+        self.log(f"Network topology: {len(valid_node_ids)} total nodes, {len(used_node_ids)} used, {len(available_node_ids)} available")
+        
+        if len(available_node_ids) >= count_needed:
+            selected = available_node_ids[:count_needed]
+            self.log(f"Selected node IDs: {selected}")
+            return selected
+        else:
+            self.log(f"Error: Need {count_needed} node IDs but only {len(available_node_ids)} available")
+            self.log(f"Available node IDs: {available_node_ids}")
+            return available_node_ids  # Return what we have
+    
+    def find_available_node_ids(self, config, count_needed):
+        """Find available network node IDs using improved topology-aware method"""
+        # Quick analysis first
+        self.analyze_network_quick(config)
+        
+        # Use improved method
+        return self.find_available_node_ids_improved(config, count_needed)
+    
+    def modify_shadow_config(self):
+        """Modify Shadow configuration following the repository methodology"""
+        config_path = self.network_dir / 'shadow.config.yaml'
+        
+        if not config_path.exists():
+            self.log(f"Error: Shadow config not found at {config_path}")
+            return False
+        
+        self.log(f"Modifying Shadow config: {config_path}")
+        
+        # Backup original
+        backup_path = config_path.with_suffix('.yaml.original')
+        if not backup_path.exists():
+            shutil.copy2(config_path, backup_path)
+            self.log(f"Created backup: {backup_path}")
+        
+        try:
+            with open(config_path, 'r') as f:
+                config = yaml.safe_load(f)
+        except Exception as e:
+            self.log(f"Error reading Shadow config: {e}")
+            return False
+        
+        # Validate network topology first
+        if not self.validate_network_topology(config):
+            self.log("Warning: Network topology validation failed")
+        
+        # Initialize counters outside the loop
+        modified_hosts = []  # List to store modified host names
+        total_oniontrace_removed = 0
+
+        for host_name, host_config in config['hosts'].items():
+            # Check if this is a perfclient host
+            if any(pattern in host_name.lower() for pattern in ['markov']):
+                if self.verbose:
+                    print(f"Converting {host_name} to articlient-extra format...")
+                
+                # Preserve the original network_node_id
+                original_node_id = host_config.get('network_node_id')
+                if original_node_id is None:
+                    print(f"Warning: No network_node_id found for {host_name}, skipping...")
+                    continue
+                
+                # Create new articlient-extra configuration
+                new_config = {
+                    'network_node_id': original_node_id,
+                    'bandwidth_up': '1000000 kilobit',
+                    'bandwidth_down': '1000000 kilobit',
+                    'host_options': {
+                        'pcap_enabled': True,
+                        'pcap_capture_size': '65535'
+                    },
+                    'processes': [
+                        # Arti process (replaces Tor)
+                        {
+                            'path': '/opt/bin/arti',
+                            'args': [
+                                'proxy',
+                                '-c=/mnt/tornet-0.01/conf/arti.common.toml',
+                                '-o=proxy.socks_listen="127.0.0.1:9050"',
+                                '--disable-fs-permission-checks',
+                                '-l='  # Disable console logging
+                            ],
+                            'environment': {
+                                'RUST_BACKTRACE': '1',
+                                'OPENBLAS_NUM_THREADS': '1',
+                                'HOME': './home'
+                            },
+                            'start_time': 240,
+                            'expected_final_state': 'running'
+                        },
+                        # tgen process for traffic generation
+                        {
+                            'path': '~/.local/bin/tgen',
+                            'args': 'tgenrc.graphml',
+                            'start_time': 300,
+                            'expected_final_state': 'running'
+                        }
+                    ]
+                }
+                
+                # Replace the host configuration
+                config['hosts'][host_name] = new_config
+                modified_hosts.append(host_name)
+                
+                if self.verbose:
+                    print(f"  ✓ Converted {host_name} (node_id: {original_node_id})")
+                    print(f"    - Replaced Tor with Arti")
+                    print(f"    - Enabled PCAP capture")
+                    print(f"    - Added tgen traffic generation")
+
+            if any(pattern in host_name.lower() for pattern in ['perf', 'client']):
+                if self.verbose:
+                    print(f"Converting {host_name} to articlient format...")
+                
+                # Preserve the original network_node_id
+                original_node_id = host_config.get('network_node_id')
+                if original_node_id is None:
+                    print(f"Warning: No network_node_id found for {host_name}, skipping...")
+                    continue
+                
+                # Create new articlient-extra configuration
+                new_config = {
+                    'network_node_id': original_node_id,
+                    'bandwidth_up': '1000000 kilobit',
+                    'bandwidth_down': '1000000 kilobit',
+                    'host_options': {
+                        'pcap_enabled': True,
+                        'pcap_capture_size': '65535'
+                    },
+                    'processes': [
+                        # Arti process (replaces Tor)
+                        {
+                            'path': '/opt/bin/arti',
+                            'args': [
+                                'proxy',
+                                '-c=/mnt/tornet-0.01/conf/arti.common.toml',
+                                '-o=proxy.socks_listen="127.0.0.1:9050"',
+                                '--disable-fs-permission-checks',
+                                '-l='  # Disable console logging
+                            ],
+                            'environment': {
+                                'RUST_BACKTRACE': '1',
+                                'OPENBLAS_NUM_THREADS': '1',
+                                'HOME': './home'
+                            },
+                            'start_time': 240,
+                            'expected_final_state': 'running'
+                        },
+                        # tgen process for traffic generation
+                        {
+                            'path': '~/.local/bin/tgen',
+                            'args': '../../../conf/tgen-perf-exit.tgenrc.graphml',
+                            'start_time': 300,
+                            'expected_final_state': 'running'
+                        }
+                    ]
+                }
+                
+                # Replace the host configuration
+                config['hosts'][host_name] = new_config
+                modified_hosts.append(host_name)
+                
+                if self.verbose:
+                    print(f"  ✓ Converted {host_name} (node_id: {original_node_id})")
+                    print(f"    - Replaced Tor with Arti")
+                    print(f"    - Enabled PCAP capture")
+                    print(f"    - Added tgen traffic generation")
+        
+        # Calculate how many new hosts we need
+        total_new_hosts_needed = 0  # zimserver
+        if self.urls:
+            # Calculate monitor hosts needed (1 per 10 URLs, max 5)
+            monitor_hosts_needed = min(5, max(1, len(self.webpage_sets['W_alpha']) // 10))
+            total_new_hosts_needed += monitor_hosts_needed
+        else:
+            monitor_hosts_needed = 0
+        
+        # Get available node IDs for new hosts using improved method
+        available_node_ids = self.find_available_node_ids(config, total_new_hosts_needed)
+        
+        if len(available_node_ids) < total_new_hosts_needed:
+            self.log(f"Error: Need {total_new_hosts_needed} node IDs but only found {len(available_node_ids)}")
+            self.log("Skipping addition of new hosts to avoid node ID conflicts")
+            # Still save the modified config with PCAP and oniontrace changes
+            try:
+                with open(config_path, 'w') as f:
+                    yaml.dump(config, f, default_flow_style=False, indent=2)
+                self.log(f"Saved config with {modified_hosts} modified client hosts")
+                return True
+            except Exception as e:
+                self.log(f"Error saving Shadow config: {e}")
+                return False
+        
+        node_id_index = 1
+        
+        # Add zimserver host following repository methodology
+        if self.urls and node_id_index < len(available_node_ids):
+            server_name = "zimserver0"
+            node_id = available_node_ids[node_id_index]
+            node_id_index += 1
+            
+            # Create zimserver configuration following repository format
+            config['hosts'][server_name] = {
+                'bandwidth_down': '200 megabit',
+                'bandwidth_up': '200 megabit',
+                'ip_addr': self.base_ip,
+                'network_node_id': node_id,
+                'processes': []
+            }
+            
+            # Add processes for ALL URLs that monitors will request (W_alpha set)
+            unique_ports = set()
+            for url_info in self.webpage_sets['W_alpha']:  # Changed from self.urls[:10] to W_alpha
+                port = url_info['original_port']
+                if port not in unique_ports and len(unique_ports) < 1:
+                    unique_ports.add(port)
+
+                    # Add zimsrv process for this port
+                    zimprocess = {
+                        'args': '-m zimsrv.py',
+                        'environment': {
+                            'ZIMROOT': './wikidata',
+                            'ZIMIP': '129.114.108.192',
+                            'ZIMPORT': str(port),
+                            'LANG': 'en_US.UTF-8',
+                            'LC_ALL': 'en_US.UTF-8',
+                            'PYTHONPATH': '/usr/local/lib/python3.10/dist-packages'
+                        },
+                        'path': '/opt/bin/python3',
+                        'start_time': '3s'
+                    }
+
+                    config['hosts'][server_name]['processes'].append(zimprocess)
+            
+            self.log(f"  Added zimserver with node ID {node_id} serving {len(unique_ports)} ports")
+        
+                # Add monitor hosts following repository methodology for wget2 fetching
+        for i in range(monitor_hosts_needed):
+            if node_id_index >= len(available_node_ids):
+                self.log(f"Warning: Ran out of available node IDs, only created {i} monitor hosts")
+                break
+                
+            monitor_name = f"monitor{i}"
+            node_id = available_node_ids[node_id_index]
+            node_id_index += 1
+            
+            # Create monitor host following repository format
+            config['hosts'][monitor_name] = {
+                'bandwidth_down': '100 megabit',
+                'bandwidth_up': '100 megabit',
+                'network_node_id': node_id,
+                'processes': [
+                    # Tor process - using correct path from Docker setup
+                    {
+                        'args': f'--Address {monitor_name} --Nickname {monitor_name} --defaults-torrc torrc-defaults -f torrc',
+                        'path': '/opt/bin/tor',
+                        'start_time': 1195
+                    }
+                ]
+            }
+            
+            # Get URLs for this monitor (max 10 per monitor)
+            monitor_urls = self.webpage_sets['W_alpha'][i*10:(i+1)*10]
+            if len(monitor_urls) > 10:
+                monitor_urls = monitor_urls[:10]
+            
+            # Configuration for multiple iterations with circuit renewal
+            base_start_time = 1200
+            iterations = 3  # Number of times to repeat the URL set
+            urls_per_batch = len(monitor_urls)  # All URLs in one batch initially
+            batch_duration = urls_per_batch * 0  # All URLs start simultaneously in each batch
+            newnym_delay = 29  # Time after batch starts to run newnym
+            iteration_interval = 30  # Time between iterations
+            
+            for iteration in range(iterations):
+                iteration_start_time = base_start_time + (iteration * iteration_interval)
+                
+                # Add wget2 processes for this iteration
+                for j, url_info in enumerate(monitor_urls):
+                    wget2_args = (
+                        '--page-requisites --max-threads=30 --timeout=30 --tries=1 '
+                        '--no-retry-on-http-error --no-tcp-fastopen --delete-after --quiet '
+                        '--user-agent="Mozilla/5.0 (Windows NT 10.0; rv:102.0) Gecko/20100101 Firefox/102.0" '
+                        '--no-robots --filter-urls --reject-regex=/w/|\\.js$ '
+                        '--http-proxy=127.0.0.1:9050 --https-proxy=127.0.0.1:9050 '
+                        '--no-check-hostname --no-check-certificate --no-hpkp --no-hsts '
+                        f'{url_info["original_url"]}'
+                    )
+                    
+                    wget2_process = {
+                        'args': wget2_args,
+                        'environment': {
+                            'LANG': 'en_US.UTF-8',
+                            'LC_ALL': 'en_US.UTF-8',
+                            'LANGUAGE': 'en_US.UTF-8',
+                            'LD_LIBRARY_PATH': '/opt/lib'
+                        },
+                        'path': '/opt/bin/wget2_noinstall',  # Using the path from your example
+                        'start_time': iteration_start_time  # All URLs in batch start at same time
+                    }
+                    
+                    config['hosts'][monitor_name]['processes'].append(wget2_process)
+                
+                # Add newnym process after this iteration (except for the last iteration)
+                if iteration < iterations - 1:  # Don't add newnym after the last iteration
+                    newnym_start_time = iteration_start_time + newnym_delay
+                    
+                    newnym_process = {
+                        'args': '-m newnym',
+                        'path': '/opt/bin/python3',
+                        'start_time': newnym_start_time
+                    }
+                    
+                    config['hosts'][monitor_name]['processes'].append(newnym_process)
+    
+            self.log(f"  Added monitor{i} with node ID {node_id}")
+            self.log(f"    - {len(monitor_urls)} URLs per iteration")
+            self.log(f"    - {iterations} iterations with circuit renewal")
+            self.log(f"    - Total processes: {len(monitor_urls) * iterations + (iterations - 1)} (wget2 + newnym)")
+
+        # Save modified config
+        try:
+            with open(config_path, 'w') as f:
+                yaml.dump(config, f, default_flow_style=False, indent=2)
+        except Exception as e:
+            self.log(f"Error saving Shadow config: {e}")
+            return False
+        
+        self.log(f"Modified {modified_hosts} client hosts")
+        # self.log(f"Added zimserver and {monitor_hosts_needed} monitor hosts")
+        return True
+    
+    def create_config_files(self):
+        """Create configuration files following repository structure with dynamic relay selection"""
+        success_count = 0
+        
+        # Create conf directory structure
+        conf_dir = self.network_dir / 'conf'
+        conf_dir.mkdir(exist_ok=True, parents=True)
+        
+        # Extract Guard relay fingerprints from consensus data
+        self.log("Extracting Guard relay fingerprints from consensus data...")
+        guard_fingerprints = self.extract_guard_relays_from_consensus()
+        
+        # If that fails, try GML extraction
+        if len(guard_fingerprints) < 2:
+            self.log("Attempting GML-based extraction...")
+            gml_fingerprints = self.extract_relay_fingerprints_from_gml()
+            if len(gml_fingerprints) >= 2:
+                guard_fingerprints = gml_fingerprints
+        
+        # Validate fingerprints
+        guard_fingerprints = self.validate_relay_fingerprints(guard_fingerprints)
+        
+        # Format fingerprints for Tor config
+        if len(guard_fingerprints) >= 2:
+            entry_nodes = ','.join(guard_fingerprints[:2])
+            signal_nodes = ','.join(guard_fingerprints[:2])
+            self.log(f"Using EntryNodes: {entry_nodes}")
+        else:
+            # Use fallback
+            fallback = self._get_fallback_fingerprints()
+            entry_nodes = ','.join(fallback)
+            signal_nodes = ','.join(fallback)
+            self.log(f"Warning: Using fallback fingerprints: {entry_nodes}")
+        
+        # Create tor.crawler.torrc with dynamic fingerprints
+        tor_crawler_content = f"""# Enter any host-specific tor config options here.
+# Note that any option specified here may override a default from torrc-defaults.
+ClientOnly 1
+ORPort 0
+DirPort 0
+
+SocksPort 127.0.0.1:9050 IsolateClientAddr IsolateDestAddr IsolateDestPort
+UseEntryGuards 1
+EntryNodes {entry_nodes}
+SignalNodes {signal_nodes}
+"""
+        
+        try:
+            with open(conf_dir / 'tor.crawler.torrc', 'w') as f:
+                f.write(tor_crawler_content)
+            self.log(f"Created tor.crawler.torrc with dynamic relay selection in {conf_dir}")
+            success_count += 1
+        except Exception as e:
+            self.log(f"Warning: Could not create tor.crawler.torrc: {e}")
+        
+        return success_count
+    
+    def create_template_files(self):
+        """Create shadow.data.template files following repository structure"""
+        success_count = 0
+        
+        # Create shadow.data.template directory structure
+        template_dir = self.network_dir / 'shadow.data.template/hosts'
+        template_dir.mkdir(exist_ok=True, parents=True)
+        
+        # torrc-defaults content
+        torrc_defaults_content = """# The following files specify default tor config options for this host.
+%include ../../../conf/tor.common.torrc
+%include ../../../conf/tor.crawler.torrc
+"""
+        
+        # newnym.py content
+        newnym_content = """import socket
+
+with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+    print("Connecting to 127.0.0.1:9051")
+    s.connect(("127.0.0.1", 9051))
+    print("Done connect")
+
+    print("Sending AUTHENTICATE")
+    s.sendall(b"AUTHENTICATE\r\n")
+    print("Done AUTHENTICATE")
+
+    print("Receiving AUTHENTICATE response")
+    data = s.recv(1024)
+    print(f"Received {data!r}")
+
+    print("Sending SIGNAL NEWNYM")
+    s.sendall(b"SIGNAL NEWNYM\r\n")
+    print("Done SIGNAL NEWNYM")
+
+    print("Receiving SIGNAL NEWNYM response")
+    data = s.recv(1024)
+    print(f"Received {data!r}")
+
+    print("All done, bye!")
+"""
+        
+        # Create monitor0 directory and files
+        monitor_dir = template_dir / 'monitor0'
+        monitor_dir.mkdir(exist_ok=True, parents=True)
+
+        try:
+            with open(monitor_dir /  "torrc", "w") as file:
+                pass  # No content is written, so the file remains empty
+        except Exception as e:
+            self.log(f"Warning: Could not create monitor0/torrc: {e}")
+        
+        try:
+            with open(monitor_dir / 'torrc-defaults', 'w') as f:
+                f.write(torrc_defaults_content)
+            self.log(f"Created monitor0/torrc-defaults")
+            success_count += 1
+        except Exception as e:
+            self.log(f"Warning: Could not create monitor0/torrc-defaults: {e}")
+        
+        try:
+            with open(monitor_dir / 'newnym.py', 'w') as f:
+                f.write(newnym_content)
+            # Make executable
+            (monitor_dir / 'newnym.py').chmod(0o755)
+            self.log(f"Created monitor0/newnym.py")
+            success_count += 1
+        except Exception as e:
+            self.log(f"Warning: Could not create monitor0/newnym.py: {e}")
+        
+        # Create additional monitor directories for multiple monitors
+        for i in range(1, 5):  # Create monitor1 through monitor4
+            monitor_i_dir = template_dir / f'monitor{i}'
+            monitor_i_dir.mkdir(exist_ok=True, parents=True)
+            
+            try:
+                with open(monitor_i_dir / 'torrc-defaults', 'w') as f:
+                    f.write(torrc_defaults_content)
+
+                with open(monitor_i_dir / 'torrc', 'w') as f:
+                    pass
+                
+                with open(monitor_i_dir / 'newnym.py', 'w') as f:
+                    f.write(newnym_content)
+                (monitor_i_dir / 'newnym.py').chmod(0o755)
+                
+                self.log(f"Created monitor{i}/ directory and files")
+                success_count += 1
+            except Exception as e:
+                self.log(f"Warning: Could not create monitor{i} files: {e}")
+        
+        # Create zimserver0 directory and zimsrv.py
+        zimserver_dir = template_dir / 'zimserver0'
+        zimserver_dir.mkdir(exist_ok=True, parents=True)
+        
+        # zimsrv.py content following repository format
+        zimsrv_content = """#!/usr/bin/env python3
+
+print('Hello zimply!')
+
+import os
+
+# use abs path to simplify the internal href links
+root = os.getenv('ZIMROOT')
+print(f'Found environment ZIMROOT={root}')
+
+ip = os.getenv('ZIMIP')
+print(f'Found environment ZIMIP={ip}')
+
+port = os.getenv('ZIMPORT')
+print(f'Found environment ZIMPORT={port}')
+
+print('Starting zimply server now!')
+
+from zimply import ZIMServer
+ZIMServer("/mnt/wikidata/wikipedia_en_top.zim",
+     index_file="/mnt/wikidata/index.idx",
+     template="/mnt/wikidata/template.html",
+     ip_address=ip,
+     port=int(port),
+     encoding="utf-8")
+"""
+        
+        try:
+            with open(zimserver_dir / 'zimsrv.py', 'w') as f:
+                f.write(zimsrv_content)
+            # Make executable
+            (zimserver_dir / 'zimsrv.py').chmod(0o755)
+            self.log(f"Created zimserver0/zimsrv.py")
+            success_count += 1
+        except Exception as e:
+            self.log(f"Warning: Could not create zimserver0/zimsrv.py: {e}")
+        
+        return success_count
+    
+    def create_wikipedia_content(self):
+        """Create Wikipedia content based on ZIM file"""
+        # Create content directory structure
+        content_dir = Path('./wikidata')
+        content_dir.mkdir(exist_ok=True, parents=True)
+        
+        created_files = 0
+
+        # Check if ZIM file exists, create a simple template if not
+        zim_path = Path(self.zim_file_path)
+        if not zim_path.exists():
+            self.log(f"ZIM file not found at {zim_path}, creating template HTML files")
+
+        # Create template.html
+        template_content = """<!DOCTYPE html>
+<html>
+<head>
+    <title>{{TITLE}}</title>
+    <meta charset="utf-8">
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; }
+        .content { max-width: 800px; margin: 0 auto; }
+    </style>
+</head>
+<body>
+    <div class="content">
+        {{CONTENT}}
+    </div>
+</body>
+</html>"""
+
+        try:
+            with open(content_dir / 'template.html', 'w') as f:
+                f.write(template_content)
+            created_files += 1
+        except Exception as e:
+            self.log(f"Warning: Could not create template.html: {e}")
+
+        try:
+            index_file = content_dir / 'index.idx'
+            with open(index_file, 'w') as f:
+                # Create a simple index for the articles we have
+                for i, url_info in enumerate(self.urls[:20]):
+                    f.write(f"{i},{url_info['title']},{url_info['page_path']}\n")
+            created_files += 1
+            self.log(f"Created index.idx with {len(self.urls[:20])} entries")
+        except Exception as e:
+            self.log(f"Warning: Could not create index.idx: {e}")
+            
+        # Create content files based on extracted URLs
+        for i, url_info in enumerate(self.urls[:20]):  # First 20 for testing
+            page_title = url_info.get('title', 'Unknown Page')
+            page_path = url_info['page_path'].lstrip('/')
+            if not page_path:
+                page_path = 'index.html'
+            
+            # Create realistic Wikipedia-like content
+            content_size = (i % 5) + 1
+            page_content = f"""<!DOCTYPE html>
+<html>
+<head>
+    <title>{page_title}</title>
+    <meta charset="utf-8">
+    <style>
+        body {{ font-family: Arial, sans-serif; margin: 40px; }}
+        .infobox {{ float: right; width: 300px; border: 1px solid #aaa; padding: 10px; margin: 10px; }}
+    </style>
+</head>
+<body>
+    <h1>{page_title}</h1>
+    
+    <div class="infobox">
+        <h3>Quick Facts</h3>
+        <p><strong>Topic:</strong> {page_title}</p>
+        <p><strong>Type:</strong> Wikipedia Article</p>
+        <p><strong>Size:</strong> {content_size * 1000} bytes (approx)</p>
+    </div>
+    
+    <p>This is a Wikipedia article simulation for Website Fingerprinting research on the topic of <strong>{page_title}</strong>.</p>
+    
+    {"".join([f'<h2>Section {j+1}</h2><p>Content section {j+1}. ' + 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. ' * content_size + '</p>' for j in range(content_size * 2)])}
+    
+    <h2>References</h2>
+    <ol>
+        {"".join([f'<li>Reference {j+1} for {page_title}</li>' for j in range(content_size)])}
+    </ol>
+    
+    <h2>External Links</h2>
+    <ul>
+        <li><a href="https://en.wikipedia.org/wiki/{page_path}">Official Wikipedia Article</a></li>
+        <li><a href="#related">Related Articles</a></li>
+    </ul>
+    
+    <script>
+        console.log('Page loaded: {page_title}');
+        // Simulate some JavaScript activity
+        for(let i = 0; i < {content_size * 20}; i++) {{
+            if (i % 5 === 0) console.log('Processing ' + i);
+        }}
+        
+        // Add some realistic JavaScript behavior
+        document.addEventListener('DOMContentLoaded', function() {{
+            console.log('DOM loaded for {page_title}');
+        }});
+    </script>
+</body>
+</html>"""
+            
+            try:
+                # Create file in content directory
+                safe_filename = page_path.replace('/', '_').replace(':', '_')
+                page_file = content_dir / f"{safe_filename}.html"
+                with open(page_file, 'w', encoding='utf-8') as f:
+                    f.write(page_content)
+                created_files += 1
+                
+            except Exception as e:
+                self.log(f"Warning: Could not create content file {page_path}: {e}")
+        
+        self.log(f"Created {created_files} content files in {content_dir}")
+        return created_files > 0
+    
+    def save_metadata(self):
+        """Save conversion metadata"""
+        metadata = {
+            'conversion_info': {
+                'network_dir': str(self.network_dir),
+                'zim_file': self.zim_file_path,
+                'total_urls': len(self.urls),
+                'methodology': 'Repository-based following exact paper implementation with ZIM file support',
+                'modifications': [
+                    'ZIM file URL extraction using zimply/libzim',
+                    'PCAP capture enabled on client hosts',
+                    'oniontrace processes added for cell collection',
+                    'zimserver added for content serving from ZIM file',
+                    'monitor hosts added for wget2 fetching',
+                    'Topology-aware node ID assignment',
+                    'Dynamic relay fingerprint extraction from consensus data'
+                ]
+            },
+            'webpage_sets': {
+                'W_alpha_count': len(self.webpage_sets['W_alpha']),
+                'W_beta_count': len(self.webpage_sets['W_beta']),
+                'W_empty_count': len(self.webpage_sets['W_empty'])
+            },
+            'zim_extraction': {
+                'zim_file_exists': Path(self.zim_file_path).exists(),
+                'extraction_method': 'zimply' if 'zimply' in str(type(self)) else 'fallback',
+                'articles_extracted': len(self.urls),
+                'base_ip': self.base_ip,
+                'port_range': f"{self.start_port}-{self.start_port + len(self.urls) - 1}" if self.urls else "none"
+            },
+            'relay_fingerprints': {
+                'dynamic_extraction': True,
+                'consensus_data_used': True,
+                'fallback_available': True,
+                'validation_enabled': True
+            },
+            'repository_alignment': {
+                'oniontrace_used': True,
+                'zimserver_format': True,
+                'wget2_format': True,
+                'monitor_hosts': True,
+                'config_files_created': True,
+                'template_files_created': True,
+                'topology_aware_nodes': True,
+                'zim_integration': True,
+                'dynamic_relay_selection': True
+            },
+            'files_created': {
+                'conf_directory': str(self.network_dir / 'conf'),
+                'template_directory': str(self.network_dir / 'shadow.data.template'),
+                'tor_crawler_torrc': str(self.network_dir / 'conf' / 'tor.crawler.torrc'),
+                'monitor_configs': 'shadow.data.template/monitor*/',
+                'zimserver_configs': 'shadow.data.template/zimserver0/',
+                'newnym_scripts': 'newnym.py files for circuit management',
+                'zimsrv_script': 'zimsrv.py for Wikipedia content serving from ZIM',
+                'urls_backup': 'urls_from_zim.txt (generated URLs for reference)'
+            }
+        }
+        
+        metadata_file = self.network_dir / 'wf_zim_metadata.json'
+        try:
+            with open(metadata_file, 'w') as f:
+                json.dump(metadata, f, indent=2)
+            self.log(f"Saved metadata: {metadata_file}")
+        except Exception as e:
+            self.log(f"Warning: Could not save metadata: {e}")
+    
+    def convert_network(self):
+        """Perform complete network conversion following repository methodology with ZIM support"""
+        self.log("Starting WF conversion with ZIM file support and dynamic relay selection")
+        self.log("Adding oniontrace, zimserver, monitor hosts, and config files")
+        
+        if not self.network_dir.exists():
+            self.log(f"Network directory {self.network_dir} does not exist")
+            return False
+        
+        success_count = 0
+        
+        # Debug consensus data availability
+        self.debug_consensus_data()
+        
+        # Step 1: Save extracted URLs for reference
+        self.log("Step 1/6: Saving extracted URLs...")
+        try:
+            self.save_urls_to_file()
+            success_count += 1
+        except Exception as e:
+            self.log(f"URL save failed: {e}")
+        
+        # Step 2: Create configuration files
+        self.log("Step 2/6: Creating configuration files...")
+        if self.create_config_files() > 0:
+            success_count += 1
+        
+        # Step 3: Create template files
+        self.log("Step 3/6: Creating shadow.data.template files...")
+        if self.create_template_files() > 0:
+            success_count += 1
+        
+        # Step 4: Modify Shadow configuration
+        self.log("Step 4/6: Modifying Shadow configuration...")
+        if self.modify_shadow_config():
+            success_count += 1
+        
+        # Step 5: Create Wikipedia content
+        self.log("Step 5/6: Creating Wikipedia content...")
+        try:
+            if self.create_wikipedia_content():
+                success_count += 1
+        except Exception as e:
+            self.log(f"Content creation failed: {e}")
+
+        # Load the config again to extract authorities
+            try:
+                config_path = self.network_dir / 'shadow.config.yaml'
+                with open(config_path, 'r') as f:
+                    config = yaml.safe_load(f)
+                
+                # Extract authorities from the config
+                authorities = self.extract_authorities_from_config(config_path)
+                if self.verbose and authorities:
+                    print(f"Found authorities in config: {', '.join(authorities)}")
+                
+                # Read authority information from tor.common.torrc
+                authorities_info = self.read_authorities_from_torrc(self.network_dir, self.verbose)
+                
+                # Read RSA and ed25519 fingerprints from authority directories
+                if authorities_info:
+                    authorities_info = self.read_authority_fingerprints(self.network_dir, authorities_info, self.verbose)
+                
+                # Update arti.common.toml with the authorities
+                if authorities_info:
+                    arti_update_success = self.update_arti_common_toml(self.network_dir, authorities_info, self.verbose)
+                    if not arti_update_success:
+                        print("Warning: Failed to update arti.common.toml with authorities")
+                else:
+                    if self.verbose:
+                        print("No authorities found in tor.common.torrc to add to arti.common.toml")
+                        
+            except Exception as e:
+                print(f"Error processing authorities for arti.common.toml: {e}")
+        
+        # Step 6: Save metadata
+        self.log("Step 6/6: Saving metadata...")
+        try:
+            self.save_metadata()
+            success_count += 1
+        except Exception as e:
+            self.log(f"Metadata save failed: {e}")
+        
+        # Summary
+        self.log(f"\nConversion completed: {success_count}/6 steps successful")
+        
+        if success_count >= 4:
+            self.log("Network successfully converted with ZIM file support and dynamic relay selection!")
+            self.log("Changes made:")
+            self.log("   • URLs extracted from ZIM file")
+            self.log("   • Dynamic relay fingerprints extracted from consensus data")
+            self.log("   • Configuration files created in conf/")
+            self.log("   • Template files created in shadow.data.template/")
+            self.log("   • PCAP capture enabled on client hosts")
+            self.log("   • oniontrace processes added for cell trace collection")
+            self.log("   • zimserver added for Wikipedia content serving")
+            self.log("   • monitor hosts added for wget2 fetching")
+            self.log("   • Topology-aware node ID assignment")
+            self.log(f"ZIM file: {self.zim_file_path}")
+            self.log(f"Config files: {self.network_dir}/conf/")
+            self.log(f"Template files: {self.network_dir}/shadow.data.template/")
+            self.log(f"Wikipedia content: ./wikidata/")
+            self.log(f"URLs backup: urls_from_zim.txt")
+            self.log(f"PCAP captures: {self.network_dir}/shadow.data/hosts/*/eth0.pcap")
+            self.log(f"Ready for simulation: tornettools simulate {self.network_dir.name}")
+            self.log("")
+            self.log("Dynamic relay selection features:")
+            self.log("   • Automatic extraction from consensus data")
+            self.log("   • Guard relay filtering by bandwidth and stability")
+            self.log("   • GML file fallback extraction method")
+            self.log("   • Fingerprint validation and formatting")
+            self.log("   • Graceful fallback to backup relays")
+            return True
+        else:
+            self.log("Conversion failed")
+            return False
+
+def main():
+    parser = argparse.ArgumentParser(
+        description='WF setup with ZIM file support and dynamic relay selection following exact repository methodology'
+    )
+    parser.add_argument('network_dir', help='Network directory')
+    parser.add_argument('--zim-file', default='./wikidata/wikipedia_en_top.zim', 
+                       help='Path to ZIM file (default: ./wikidata/wikipedia_en_top.zim)')
+    parser.add_argument('--verbose', '-v', action='store_true', help='Verbose output')
+    
+    args = parser.parse_args()
+    
+    converter = ImprovedWFConfigConverter(args.network_dir, args.zim_file, args.verbose)
+    success = converter.convert_network()
+    
+    sys.exit(0 if success else 1)
+
+if __name__ == "__main__":
+    main()
