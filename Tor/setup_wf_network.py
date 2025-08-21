@@ -837,52 +837,110 @@ class ImprovedWFConfigConverter:
         if not self.validate_network_topology(config):
             self.log("Warning: Network topology validation failed")
         
-        # Modify existing client hosts following repository approach
-        modified_hosts = 0
-        oniontrace_added = 0
-        
+        # Initialize counters outside the loop
+        modified_hosts = []  # List to store modified host names
+        total_oniontrace_removed = 0
+
         for host_name, host_config in config['hosts'].items():
-            # Target client hosts that will generate WF traffic
-            if any(pattern in host_name.lower() for pattern in ['client', 'markov']):
+            # Check if this is a perfclient host
+            if any(pattern in host_name.lower() for pattern in ['markov']):
+                if self.verbose:
+                    print(f"Converting {host_name} to articlient-extra format...")
                 
-                # Enable PCAP capture (following your approach)
-                if 'host_options' not in host_config:
-                    host_config['host_options'] = {}
+                # Preserve the original network_node_id
+                original_node_id = host_config.get('network_node_id')
+                if original_node_id is None:
+                    print(f"Warning: No network_node_id found for {host_name}, skipping...")
+                    continue
                 
-                host_config['host_options']['pcap_enabled'] = True
-                host_config['host_options']['pcap_capture_size'] = 65535
-                
-                # Add oniontrace process following repository methodology
-                tor_found = False
-                for process in host_config.get('processes', []):
-                    if 'tor' in process.get('path', '').lower():
-                        tor_found = True
-                        # Ensure Tor has control port (already in your script)
-                        args = process.get('args', '')
-                        if '--ControlPort' not in args and 'TorControlPort=9051' not in args:
-                            args += ' --ControlPort 9051'
-                        if '--CookieAuthentication' not in args:
-                            args += ' --CookieAuthentication 0'
-                        process['args'] = args.strip()
-                
-                # Add oniontrace process following repository format
-                if tor_found:
-                    # Check if oniontrace already exists
-                    has_oniontrace = any('oniontrace' in proc.get('path', '') 
-                                       for proc in host_config.get('processes', []))
-                    
-                    if not has_oniontrace:
-                        oniontrace_process = {
-                            'args': 'Mode=log TorControlPort=9051 LogLevel=info Events=BW,CIRC',
-                            'path': f'{os.path.expanduser("~")}/.local/bin/oniontrace',
-                            'start_time': 241  # Start after Tor (following repository)
+                # Create new articlient-extra configuration
+                new_config = {
+                    'network_node_id': original_node_id,
+                    'bandwidth_up': '1000000 kilobit',
+                    'bandwidth_down': '1000000 kilobit',
+                    'host_options': {
+                        'pcap_enabled': True,
+                        'pcap_capture_size': '65535'
+                    },
+                    'processes': [
+                        # Arti process (replaces Tor)
+                        {
+                            'path': '/opt/bin/tor',
+                            'args': '--defaults-torrc torrc-defaults -f torrc',
+                            'environment': {
+                                'OPENBLAS_NUM_THREADS': '1',
+                            },
+                            'start_time': '240',
+                            'expected_final_state': 'running'
+                        },
+                        # tgen process for traffic generation
+                        {
+                            'path': '/opt/bin/tgen',
+                            'args': 'tgenrc.graphml',
+                            'start_time': 300,
+                            'expected_final_state': 'running'
                         }
-                        host_config['processes'].append(oniontrace_process)
-                        oniontrace_added += 1
-                        self.log(f"  Added oniontrace to {host_name}")
+                    ]
+                }
+
+                # Replace the host configuration
+                config['hosts'][host_name] = new_config
                 
-                modified_hosts += 1
-                self.log(f"  Enabled PCAP for {host_name}")
+                if self.verbose:
+                    print(f"  ✓ Converted {host_name} (node_id: {original_node_id})")
+                    print(f"    - Replaced Tor with Arti")
+                    print(f"    - Enabled PCAP capture")
+                    print(f"    - Added tgen traffic generation")
+
+                # Check if this is a perfclient host
+            if any(pattern in host_name.lower() for pattern in ['perf']):
+                if self.verbose:
+                    print(f"Converting {host_name} to articlient-extra format...")
+                
+                # Preserve the original network_node_id
+                original_node_id = host_config.get('network_node_id')
+                if original_node_id is None:
+                    print(f"Warning: No network_node_id found for {host_name}, skipping...")
+                    continue
+                
+                # Create new articlient-extra configuration
+                new_config = {
+                    'network_node_id': original_node_id,
+                    'bandwidth_up': '1000000 kilobit',
+                    'bandwidth_down': '1000000 kilobit',
+                    'host_options': {
+                        'pcap_enabled': True,
+                        'pcap_capture_size': '65535'
+                    },
+                    'processes': [
+                        # Arti process (replaces Tor)
+                        {
+                            'path': '/opt/bin/tor',
+                            'args': '--defaults-torrc torrc-defaults -f torrc',
+                            'environment': {
+                                'OPENBLAS_NUM_THREADS': '1',
+                            },
+                            'start_time': '240',
+                            'expected_final_state': 'running'
+                        },
+                        # tgen process for traffic generation
+                        {
+                            'path': '/opt/bin/tgen',
+                            'args': '../../../conf/tgen-perf-exit.tgenrc.graphml',
+                            'start_time': 300,
+                            'expected_final_state': 'running'
+                        }
+                    ]
+                }
+            
+                # Replace the host configuration
+                config['hosts'][host_name] = new_config
+            
+                if self.verbose:
+                    print(f"  ✓ Converted {host_name} (node_id: {original_node_id})")
+                    print(f"    - Replaced Tor with Arti")
+                    print(f"    - Enabled PCAP capture")
+                    print(f"    - Added tgen traffic generation")
         
         # Calculate how many new hosts we need
         total_new_hosts_needed = 0  # zimserver
@@ -941,9 +999,10 @@ class ImprovedWFConfigConverter:
                             'ZIMIP': '129.114.108.192',
                             'ZIMPORT': str(port),
                             'LANG': 'en_US.UTF-8',
-                            'LC_ALL': 'en_US.UTF-8'
+                            'LC_ALL': 'en_US.UTF-8',
+                            'PYTHONPATH': '/usr/local/lib/python3.10/dist-packages'
                         },
-                        'path': '/usr/bin/python3',
+                        'path': '/opt/bin/python3',
                         'start_time': '3s'
                     }
 
@@ -970,7 +1029,7 @@ class ImprovedWFConfigConverter:
                     # Tor process - using correct path from Docker setup
                     {
                         'args': f'--Address {monitor_name} --Nickname {monitor_name} --defaults-torrc torrc-defaults -f torrc',
-                        'path': f'{os.path.expanduser("~")}/.local/bin/tor',
+                        'path': '/opt/bin/tor',
                         'start_time': 1195
                     }
                 ]
@@ -1001,7 +1060,7 @@ class ImprovedWFConfigConverter:
                         'LANGUAGE': 'en_US.UTF-8',
                         'LD_LIBRARY_PATH': '/opt/lib'
                     },
-                    'path': f'{os.path.expanduser("~")}/.local/bin/wget2',
+                    'path': '/opt/bin/wget2',
                     'start_time': start_time + j * 180  # 1 minute apart
                 }
                 
@@ -1018,7 +1077,6 @@ class ImprovedWFConfigConverter:
             return False
         
         self.log(f"Modified {modified_hosts} client hosts")
-        self.log(f"Added oniontrace to {oniontrace_added} hosts")
         # self.log(f"Added zimserver and {monitor_hosts_needed} monitor hosts")
         return True
     
@@ -1193,9 +1251,9 @@ print(f'Found environment ZIMPORT={port}')
 print('Starting zimply server now!')
 
 from zimply import ZIMServer
-ZIMServer(f"{root}/wikipedia_en_top.zim",
-     index_file=f"{root}/index.idx",
-     template=f"{root}/template.html",
+ZIMServer("/mnt/wikidata/wikipedia_en_top.zim",
+     index_file="/mnt/wikidata/index.idx",
+     template="/mnt/wikidata/template.html",
      ip_address=ip,
      port=int(port),
      encoding="utf-8")

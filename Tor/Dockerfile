@@ -2,9 +2,6 @@ FROM ubuntu:22.04 AS base
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Define software versions
-# ENV ONIONTRACE_COMMIT=f271ead90526b29b3dd7218ce6e56813e3b4dce3
-# ENV TORNETTOOLS_COMMIT=75e59fab4f4e95fc7636df44202e287d76bfefea
 # Get basic packages
 RUN apt-get update && apt-get install -y apt-utils git sudo
 RUN apt-get install -y locales
@@ -130,52 +127,57 @@ RUN pip3 install -I .
 RUN pip3 install zimply
 
 
-# build special wget2 that supports socks proxy
-# FROM base as build-wget2
-# COPY wget2-socks.tar /root/src/wget2-socks.tar
-# WORKDIR /root/src
-# RUN tar xaf wget2-socks.tar
-# WORKDIR /root/src/wget2-socks
-# RUN apt-get update && apt-get install -y \
-#   autoconf \
-#   automake \
-#   autogen \
-#   autopoint \
-#   libtool \
-#   gettext \
-#   gcc \
-#   make \
-#   rsync \
-#   wget \
-#   tar \
-#   texinfo \
-#   pkg-config \
-#   flex \
-#   lzip \
-#   gnupg1 \
-#   libfl-dev \
-#   libidn2-dev \
-#   libpsl-dev \
-#   libgnutls28-dev \
-#   libiconv-hook-dev \
-#   zlib1g-dev \
-#   libpcre2-dev \
-#   libgpgme-dev \
-#   libassuan-dev \
-#   libnghttp2-dev
-# RUN git config --global --add safe.directory /root/src/wget2-socks
-# RUN git config --global --add safe.directory /root/src/wget2-socks/gnulib
-# RUN ./bootstrap
-# RUN ./configure \
-#   --prefix=/opt \
-#   --enable-threads=posix \
-#   --disable-doc \
-#   --without-lzip \
-#   --without-libhsts
-# # ENV CPPFLAGS=-DDEBUG
-# # ENV CFLAGS="-ggdb -O0"
-# RUN make
-# RUN make install
+FROM base AS build-wget2
+WORKDIR /mnt
+
+# Clone wget2 directly
+RUN git clone https://gitlab.com/gnuwget/wget2.git
+WORKDIR /mnt/wget2
+RUN git checkout edfd08
+# Copy and apply patch
+COPY wget2/socks.patch ./
+RUN git config --global user.email "builder@example.com" && \
+    git config --global user.name "Docker Builder"
+RUN git am socks.patch 
+RUN apt-get update && apt-get install -y \
+  autoconf \
+  automake \
+  autogen \
+  autopoint \
+  libtool \
+  gettext \
+  gcc \
+  make \
+  rsync \
+  wget \
+  tar \
+  texinfo \
+  pkg-config \
+  flex \
+  lzip \
+  gnupg1 \
+  libfl-dev \
+  libidn2-dev \
+  libpsl-dev \
+  libgnutls28-dev \
+  libiconv-hook-dev \
+  zlib1g-dev \
+  libpcre2-dev \
+  libgpgme-dev \
+  libassuan-dev \
+  libnghttp2-dev
+RUN git clone https://github.com/coreutils/gnulib.git gnulib
+RUN git submodule init && git submodule update
+
+# Configure git safely
+RUN git config --global --add safe.directory /mnt/wget2
+RUN git config --global --add safe.directory /mnt/wget2/gnulib
+
+# Build and install
+RUN ./bootstrap
+RUN ./configure --prefix=/opt --enable-threads=posix --disable-doc --without-lzip --without-libhsts
+RUN make -j"$(nproc)"
+RUN make install
 
 FROM base AS simulate
 WORKDIR /mnt
@@ -199,23 +201,20 @@ RUN apt-get update && apt-get install -y \
   libigraph-dev \
   libprocps-dev
 # wget2 runtime deps
-# RUN apt-get update && apt-get install -y \
-#   gnupg1 \
-#   libfl-dev \
-#   libidn2-dev \
-#   libpsl-dev \
-#   libgnutls28-dev \
-#   libiconv-hook-dev \
-#   zlib1g-dev \
-#   libpcre2-dev \
-#   libgpgme-dev \
-#   libassuan-dev \
-#   libnghttp2-dev
-# perf
-#RUN apt-get update && apt-get install -y linux-tools-generic
-#RUN mkdir -p /root/.local/bin
-#RUN ln -s /usr/lib/linux-tools/5.4.0-81-generic/perf /root/.local/bin/perf
-#COPY --from=tornettools-generate /root/data/tornet-* /root/data/tornet
+RUN apt-get update && apt-get install -y \
+  gnupg1 \
+  libfl-dev \
+  libidn2-dev \
+  libpsl-dev \
+  libgnutls28-dev \
+  libiconv-hook-dev \
+  zlib1g-dev \
+  libpcre2-dev \
+  libgpgme-dev \
+  libassuan-dev \
+  libnghttp2-dev
+
+  
 RUN echo fs.nr_open = 104857600 >> /etc/sysctl.conf
 RUN echo fs.file-max = 104857600 >> /etc/sysctl.conf
 RUN echo vm.max_map_count = 1073741824 >> /etc/sysctl.conf
@@ -228,13 +227,19 @@ COPY --from=build-tgen /opt /opt/
 COPY --from=build-tor /opt /opt/
 COPY --from=build-oniontrace /opt /opt/
 COPY --from=build-tornettools /opt /opt/
-# COPY --from=build-wget2 /opt /opt/
+COPY --from=build-wget2 /opt /opt/
+
 # Setup run env
 ENV PYVENV=/opt
 ENV PATH=/opt/bin:$PATH
 ENV LD_LIBRARY_PATH=/opt/lib
 
 WORKDIR /mnt
+
+RUN mkdir -p wikidata && \
+    cd wikidata && \
+    wget -O wikipedia_en_top.zim \
+    "https://download.kiwix.org/zim/wikipedia/wikipedia_en_100_maxi_2025-07.zim"
 
 RUN wget https://collector.torproject.org/archive/relay-descriptors/consensuses/consensuses-2025-07.tar.xz
 RUN wget https://collector.torproject.org/archive/relay-descriptors/server-descriptors/server-descriptors-2025-07.tar.xz
@@ -245,13 +250,8 @@ RUN tar xaf consensuses-2025-07.tar.xz
 RUN tar xaf server-descriptors-2025-07.tar.xz
 RUN tar xaf onionperf-2025-07.tar.xz
 RUN git clone https://github.com/tmodel-ccs2018/tmodel-ccs2018.github.io.git
-
-# RUN git clone https://git.torproject.org/tor.git
-# RUN cd tor
-# RUN ./autogen.sh
-# RUN ./configure --disable-asciidoc --disable-unittests --disable-manpage --disable-html-manual
-# RUN make -j$(nproc)
-# RUN cd ..
-# RUN export PATH=${PATH}:`pwd`/tor/src/core/or:`pwd`/tor/src/app:`pwd`/tor/src/tools
+# In the simulate stage, before the final RUN pip3 install zimply
+RUN apt-get update && apt-get install -y python3-pip
+RUN /usr/bin/python3 -m pip install zimply
 
 ENTRYPOINT ["bash"]
