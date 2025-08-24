@@ -75,6 +75,7 @@ class ImprovedWFConfigConverter:
         existing_files = []
         for config_file in config_files:
             target_path = target_dir / config_file
+            print(target_path)
             if target_path.exists():
                 existing_files.append(config_file)
         
@@ -112,7 +113,7 @@ class ImprovedWFConfigConverter:
             return False
 
 
-    def extract_authorities_from_config(config):
+    def extract_authorities_from_config(self, config):
         """
         Extract authority host names from the shadow.config.yaml
         
@@ -142,7 +143,7 @@ class ImprovedWFConfigConverter:
         return authorities
 
 
-    def read_authorities_from_torrc(config_dir, verbose=True):
+    def read_authorities_from_torrc(self, config_dir, verbose=True):
         """
         Read authority information from tor.common.torrc file
         
@@ -208,7 +209,7 @@ class ImprovedWFConfigConverter:
         return authorities
 
 
-    def read_authority_fingerprints(config_dir, authorities, verbose=True):
+    def read_authority_fingerprints(self, config_dir, authorities, verbose=True):
         """
         Read RSA and ed25519 fingerprints from authority directories
         
@@ -273,7 +274,7 @@ class ImprovedWFConfigConverter:
         return authorities
 
 
-    def update_arti_common_toml(config_dir, authorities_info, verbose=True):
+    def update_arti_common_toml(self, config_dir, authorities_info, verbose=True):
         """
         Update arti.common.toml with the authorities and fallback caches from the config
         
@@ -399,170 +400,6 @@ class ImprovedWFConfigConverter:
             if verbose:
                 print(f"Error updating arti.common.toml: {e}")
             return False
-    
-    def extract_guard_relays_from_consensus(self):
-        """Extract suitable Guard relay fingerprints from consensus data"""
-        relay_info_file = None
-        
-        # Look for relay info file in the current directory
-        possible_files = [
-            'relayinfo_staging_2025-07-01--2025-07-31.json',
-            # Add pattern matching for other potential files
-        ]
-        
-        for filename in possible_files:
-            if Path(filename).exists():
-                relay_info_file = Path(filename)
-                break
-        
-        # If not found, try to find any relayinfo file
-        if not relay_info_file:
-            relay_files = glob.glob('relayinfo_staging_*.json')
-            if relay_files:
-                relay_info_file = Path(relay_files[0])
-        
-        if not relay_info_file:
-            self.log("Warning: No relay info file found, using fallback fingerprints")
-            return self._get_fallback_fingerprints()
-        
-        self.log(f"Extracting Guard relays from: {relay_info_file}")
-        
-        try:
-            with open(relay_info_file, 'r') as f:
-                relay_data = json.load(f)
-            
-            guard_relays = []
-            
-            # Parse relay data to find suitable Guards
-            if 'relays' in relay_data:
-                relays = relay_data['relays']
-            elif isinstance(relay_data, list):
-                relays = relay_data
-            else:
-                self.log("Warning: Unexpected relay data format")
-                return self._get_fallback_fingerprints()
-            
-            for relay in relays:
-                # Check if relay has Guard flag
-                flags = relay.get('flags', [])
-                if isinstance(flags, str):
-                    flags = flags.split(',')
-                
-                if 'Guard' not in flags:
-                    continue
-                
-                # Check bandwidth (prefer high-bandwidth relays)
-                bandwidth = relay.get('observed_bandwidth', 0)
-                if isinstance(bandwidth, str):
-                    try:
-                        bandwidth = int(bandwidth)
-                    except ValueError:
-                        bandwidth = 0
-                
-                # Require at least 5MB/s
-                if bandwidth < 5000000:
-                    continue
-                
-                # Check uptime/stability indicators
-                running = 'Running' in flags
-                stable = 'Stable' in flags
-                
-                if not (running and stable):
-                    continue
-                
-                fingerprint = relay.get('fingerprint')
-                if fingerprint and len(fingerprint) == 40:
-                    # Remove spaces and ensure uppercase
-                    clean_fingerprint = fingerprint.replace(' ', '').upper()
-                    if len(clean_fingerprint) == 40:
-                        guard_relays.append({
-                            'fingerprint': clean_fingerprint,
-                            'bandwidth': bandwidth,
-                            'nickname': relay.get('nickname', 'Unknown'),
-                            'country': relay.get('country', 'Unknown')
-                        })
-            
-            # Sort by bandwidth (descending) and take top relays
-            guard_relays.sort(key=lambda x: x['bandwidth'], reverse=True)
-            
-            if len(guard_relays) >= 2:
-                selected = guard_relays[:2]  # Take top 2
-                fingerprints = [relay['fingerprint'] for relay in selected]
-                
-                self.log(f"Selected Guard relays:")
-                for relay in selected:
-                    self.log(f"  {relay['fingerprint']} ({relay['nickname']}, {relay['bandwidth']/1000000:.1f}MB/s, {relay['country']})")
-                
-                return fingerprints
-            else:
-                self.log(f"Warning: Only found {len(guard_relays)} suitable Guard relays")
-                return self._get_fallback_fingerprints()
-                
-        except Exception as e:
-            self.log(f"Error parsing relay info file: {e}")
-            return self._get_fallback_fingerprints()
-
-    def _get_fallback_fingerprints(self):
-        """Fallback fingerprints if consensus parsing fails"""
-        # These are actual long-running Guard relays as of 2024
-        # You should replace these with current ones from your consensus period
-        fallback_fingerprints = [
-            "185F2A57B0C4620582F73F3B28AECB394CB8B3BB",  # longclaw
-            "7BE683E65D48141321C5ED92F075C55364AC7123",  # gabelmoo  
-        ]
-        self.log("Using fallback Guard relay fingerprints")
-        return fallback_fingerprints
-
-    def extract_relay_fingerprints_from_gml(self):
-        """Alternative method: Extract relay fingerprints from GML topology file"""
-        try:
-            gml_file = Path('networkinfo_staging.gml')
-            if not gml_file.exists():
-                return []
-            
-            self.log(f"Attempting to extract relay info from GML file: {gml_file}")
-            
-            with open(gml_file, 'r') as f:
-                content = f.read()
-            
-            # Look for node entries with relay information
-            # GML format may contain fingerprint information in node attributes
-            
-            # Pattern to match nodes with potential fingerprint data
-            node_pattern = r'node\s*\[\s*id\s+(\d+)[^]]*fingerprint\s+"([A-F0-9]{40})"[^]]*flags\s+"([^"]*)"[^]]*\]'
-            matches = re.findall(node_pattern, content, re.IGNORECASE | re.DOTALL)
-            
-            guard_relays = []
-            for node_id, fingerprint, flags in matches:
-                if 'Guard' in flags:
-                    guard_relays.append(fingerprint)
-            
-            if len(guard_relays) >= 2:
-                self.log(f"Extracted {len(guard_relays)} Guard relays from GML file")
-                return guard_relays[:2]
-            else:
-                self.log("GML file extraction failed or insufficient Guard relays found")
-                return []
-                
-        except Exception as e:
-            self.log(f"Error extracting from GML file: {e}")
-            return []
-
-    def validate_relay_fingerprints(self, fingerprints):
-        """Validate that extracted fingerprints are properly formatted"""
-        valid_fingerprints = []
-        
-        for fp in fingerprints:
-            # Remove any spaces and ensure uppercase
-            clean_fp = fp.replace(' ', '').upper()
-            
-            # Check length and format
-            if len(clean_fp) == 40 and all(c in '0123456789ABCDEF' for c in clean_fp):
-                valid_fingerprints.append(clean_fp)
-            else:
-                self.log(f"Warning: Invalid fingerprint format: {fp}")
-        
-        return valid_fingerprints
 
     def debug_consensus_data(self):
         """Debug method to inspect available consensus data"""
@@ -608,7 +445,7 @@ class ImprovedWFConfigConverter:
             
             processed_count = 0
             attempts = 0
-            max_attempts = 500  # Try more attempts to get enough articles
+            max_attempts = 10000  # Try more attempts to get enough articles
             
             # First, try to get articles using random entry method
             while processed_count < 100 and attempts < max_attempts:
@@ -676,51 +513,6 @@ class ImprovedWFConfigConverter:
                 except Exception as e:
                     continue  # Skip problematic entries
             
-            # If we still don't have enough articles, try some common Wikipedia article names
-            if processed_count < 50:
-                self.log(f"Only found {processed_count} articles via random sampling, trying common articles...")
-                
-                common_articles = [
-                    "Main_Page", "Wikipedia", "Association_football", "Biology", "Chemistry", 
-                    "Physics", "Mathematics", "Computer_science", "History", "Geography",
-                    "Literature", "Philosophy", "Psychology", "Art", "Music", "Science",
-                    "Technology", "Medicine", "Engineering", "Economics", "Politics",
-                    "Democracy", "Education", "Culture", "Language", "Earth", "Universe",
-                    "Evolution", "DNA", "Energy", "Climate_change", "Internet", "Artificial_intelligence"
-                ]
-                
-                for article_name in common_articles:
-                    if processed_count >= 100:
-                        break
-                        
-                    try:
-                        # Try to get entry by title
-                        if archive.has_entry_by_title(article_name):
-                            entry = archive.get_entry_by_title(article_name)
-                            
-                            # Skip if we already have this title
-                            if any(url['title'] == article_name for url in urls):
-                                continue
-                            
-                            url_title = urllib.parse.quote(article_name, safe='_-.')
-                            port = self.start_port + processed_count
-                            full_url = f"http://{self.base_ip}:{port}/{url_title}"
-                            
-                            urls.append({
-                                'original_ip': self.base_ip,
-                                'original_port': port,
-                                'original_url': full_url,
-                                'page_path': f'/{url_title}',
-                                'id': processed_count,
-                                'title': article_name.replace('_', ' ')
-                            })
-                            
-                            processed_count += 1
-                            
-                    except Exception as e:
-                        continue
-                
-                self.log(f"Added {processed_count - len([u for u in urls if not u['title'].replace(' ', '_') in common_articles])} common articles")
                             
         except Exception as e:
             self.log(f"Error reading ZIM file with libzim: {e}")
@@ -730,70 +522,15 @@ class ImprovedWFConfigConverter:
             
         self.log(f"Extracted {len(urls)} URLs from ZIM file")
         return urls
-    
-    def _extract_manual(self):
-        """Manual extraction by reading ZIM file structure"""
-        zim_path = Path(self.zim_file_path)
-        if not zim_path.exists():
-            self.log(f"Error: ZIM file not found at {zim_path}")
-            return []
-        
-        # Fallback: generate some common Wikipedia articles
-        self.log("Using fallback article list since ZIM libraries not available")
-        
-        common_articles = [
-            "Association_football", "Team_sport", "Biology", "Chemistry", "Physics",
-            "Mathematics", "Computer_science", "Engineering", "Medicine", "History",
-            "Geography", "Literature", "Philosophy", "Psychology", "Sociology",
-            "Economics", "Politics", "Art", "Music", "Culture",
-            "Science", "Technology", "Education", "Health", "Environment",
-            "Climate_change", "Energy", "Transportation", "Communication", "Internet",
-            "World_Wide_Web", "Artificial_intelligence", "Machine_learning", "Robotics", "Space",
-            "Astronomy", "Earth", "Solar_system", "Universe", "Evolution",
-            "DNA", "Genetics", "Ecology", "Biodiversity", "Conservation",
-            "Democracy", "Human_rights", "International_law", "United_Nations", "Peace",
-            "War", "Conflict_resolution", "Diplomacy", "Trade", "Globalization",
-            "Language", "Communication", "Writing", "Reading", "Books",
-            "Libraries", "Museums", "Archives", "Knowledge", "Information",
-            "Data", "Statistics", "Research", "Scientific_method", "Hypothesis",
-            "Theory", "Experiment", "Observation", "Analysis", "Discovery",
-            "Innovation", "Invention", "Patent", "Copyright", "Intellectual_property",
-            "Ethics", "Morality", "Justice", "Law", "Legal_system",
-            "Constitution", "Government", "Parliament", "President", "Prime_minister",
-            "Election", "Voting", "Political_party", "Campaign", "Public_policy",
-            "Social_welfare", "Healthcare", "Education_system", "Infrastructure", "Urban_planning",
-            "Rural_development", "Agriculture", "Food_security", "Water_resources", "Natural_resources",
-            "Renewable_energy", "Fossil_fuels", "Nuclear_energy", "Solar_power", "Wind_power",
-            "Hydroelectric_power", "Geothermal_energy", "Biomass", "Energy_efficiency", "Sustainability"
-        ]
-        
-        urls = []
-        for i, article in enumerate(common_articles[:100]):  # Limit to 100
-            port = self.start_port + i
-            full_url = f"http://{self.base_ip}:{port}/{article}"
             
-            urls.append({
-                'original_ip': self.base_ip,
-                'original_port': port,
-                'original_url': full_url,
-                'page_path': f'/{article}',
-                'id': i,
-                'title': article.replace('_', ' ')
-            })
-        
-        self.log(f"Generated {len(urls)} fallback URLs")
-        return urls
-        
     def load_and_process_urls(self):
         """Load URLs from ZIM file and process them"""
         self.log(f"Loading Wikipedia articles from ZIM file: {self.zim_file_path}")
         
-        #urls = self._extract_with_libzim()
-        urls = self._extract_manual()
+        urls = self._extract_with_libzim()
         
         if not urls:
             self.log("No URLs extracted, using fallback method")
-            urls = self._extract_manual()
         
         self.log(f"Loaded {len(urls)} Wikipedia pages from ZIM file")
         
@@ -1204,13 +941,10 @@ class ImprovedWFConfigConverter:
         
         # Initialize counters outside the loop
         modified_hosts = []  # List to store modified host names
-        total_oniontrace_removed = 0
 
         for host_name, host_config in config['hosts'].items():
             # Check if this is a perfclient host
             if any(pattern in host_name.lower() for pattern in ['markov']):
-                if self.verbose:
-                    print(f"Converting {host_name} to articlient-extra format...")
                 
                 # Preserve the original network_node_id
                 original_node_id = host_config.get('network_node_id')
@@ -1246,29 +980,32 @@ class ImprovedWFConfigConverter:
                             'start_time': 240,
                             'expected_final_state': 'running'
                         },
+                        {
+                            'path': '/opt/bin/oniontrace',
+                            'args': 'Mode=log TorControlPort=9051 LogLevel=info Events=BW,CIRC',
+                            'start_time': 241,
+                        },
                         # tgen process for traffic generation
                         {
-                            'path': '~/.local/bin/tgen',
+                            'path': '/opt/bin/tgen',
                             'args': 'tgenrc.graphml',
                             'start_time': 300,
                             'expected_final_state': 'running'
                         }
                     ]
                 }
-                
+
                 # Replace the host configuration
                 config['hosts'][host_name] = new_config
-                modified_hosts.append(host_name)
-                
+            
                 if self.verbose:
                     print(f"  ✓ Converted {host_name} (node_id: {original_node_id})")
                     print(f"    - Replaced Tor with Arti")
                     print(f"    - Enabled PCAP capture")
                     print(f"    - Added tgen traffic generation")
 
-            if any(pattern in host_name.lower() for pattern in ['perf', 'client']):
-                if self.verbose:
-                    print(f"Converting {host_name} to articlient format...")
+            # Check if this is a perfclient host
+            if any(pattern in host_name.lower() for pattern in ['perfclient']):
                 
                 # Preserve the original network_node_id
                 original_node_id = host_config.get('network_node_id')
@@ -1304,20 +1041,24 @@ class ImprovedWFConfigConverter:
                             'start_time': 240,
                             'expected_final_state': 'running'
                         },
+                        {
+                            'path': '/opt/bin/oniontrace',
+                            'args': 'Mode=log TorControlPort=9051 LogLevel=info Events=BW,CIRC',
+                            'start_time': 241,
+                        },
                         # tgen process for traffic generation
                         {
-                            'path': '~/.local/bin/tgen',
+                            'path': '/opt/bin/tgen',
                             'args': '../../../conf/tgen-perf-exit.tgenrc.graphml',
                             'start_time': 300,
                             'expected_final_state': 'running'
                         }
                     ]
                 }
-                
+
                 # Replace the host configuration
                 config['hosts'][host_name] = new_config
-                modified_hosts.append(host_name)
-                
+            
                 if self.verbose:
                     print(f"  ✓ Converted {host_name} (node_id: {original_node_id})")
                     print(f"    - Replaced Tor with Arti")
@@ -1361,7 +1102,7 @@ class ImprovedWFConfigConverter:
             config['hosts'][server_name] = {
                 'bandwidth_down': '200 megabit',
                 'bandwidth_up': '200 megabit',
-                'ip_addr': self.base_ip,
+                'ip_addr': '10.0.0.1',
                 'network_node_id': node_id,
                 'processes': []
             }
@@ -1370,22 +1111,23 @@ class ImprovedWFConfigConverter:
             unique_ports = set()
             for url_info in self.webpage_sets['W_alpha']:  # Changed from self.urls[:10] to W_alpha
                 port = url_info['original_port']
-                if port not in unique_ports and len(unique_ports) < 1:
+                if port not in unique_ports:
                     unique_ports.add(port)
 
                     # Add zimsrv process for this port
                     zimprocess = {
-                        'args': '-m zimsrv.py',
+                        'args': 'zimsrv.py',
                         'environment': {
-                            'ZIMROOT': './wikidata',
-                            'ZIMIP': '129.114.108.192',
+                            'ZIMROOT': '/mnt/wikidata',
+                            'ZIMIP': '10.0.0.1',
                             'ZIMPORT': str(port),
                             'LANG': 'en_US.UTF-8',
                             'LC_ALL': 'en_US.UTF-8',
                             'PYTHONPATH': '/usr/local/lib/python3.10/dist-packages'
                         },
                         'path': '/opt/bin/python3',
-                        'start_time': '3s'
+                        'start_time': '3s',
+                        'expected_final_state': 'running'
                     }
 
                     config['hosts'][server_name]['processes'].append(zimprocess)
@@ -1412,7 +1154,8 @@ class ImprovedWFConfigConverter:
                     {
                         'args': f'--Address {monitor_name} --Nickname {monitor_name} --defaults-torrc torrc-defaults -f torrc',
                         'path': '/opt/bin/tor',
-                        'start_time': 1195
+                        'start_time': 1195,
+                        'expected_final_state': 'running'
                     }
                 ]
             }
@@ -1423,7 +1166,7 @@ class ImprovedWFConfigConverter:
                 monitor_urls = monitor_urls[:10]
             
             # Configuration for multiple iterations with circuit renewal
-            base_start_time = 1200
+            base_start_time = 1300
             iterations = 3  # Number of times to repeat the URL set
             urls_per_batch = len(monitor_urls)  # All URLs in one batch initially
             batch_duration = urls_per_batch * 0  # All URLs start simultaneously in each batch
@@ -1435,15 +1178,24 @@ class ImprovedWFConfigConverter:
                 
                 # Add wget2 processes for this iteration
                 for j, url_info in enumerate(monitor_urls):
-                    wget2_args = (
-                        '--page-requisites --max-threads=30 --timeout=30 --tries=1 '
-                        '--no-retry-on-http-error --no-tcp-fastopen --delete-after --quiet '
-                        '--user-agent="Mozilla/5.0 (Windows NT 10.0; rv:102.0) Gecko/20100101 Firefox/102.0" '
-                        '--no-robots --filter-urls --reject-regex=/w/|\\.js$ '
-                        '--http-proxy=127.0.0.1:9050 --https-proxy=127.0.0.1:9050 '
-                        '--no-check-hostname --no-check-certificate --no-hpkp --no-hsts '
-                        f'{url_info["original_url"]}'
-                    )
+                    wget2_args = [
+                        '--page-requisites',
+                        '--max-threads=2', 
+                        '--timeout=30',
+                        '--tries=1',
+                        '--no-retry-on-http-error',
+                        '--no-tcp-fastopen',
+                        '--delete-after',
+                        '--user-agent=Mozilla/5.0 (Windows NT 10.0; rv:102.0) Gecko/20100101 Firefox/102.0',
+                        '--no-robots',
+                        '--filter-urls',
+                        '--reject-regex=/w/|\\.js$|robots\.txt$',
+                        '--no-check-hostname',
+                        '--no-check-certificate', 
+                        '--no-hpkp',
+                        '--no-hsts',
+                        url_info["original_url"]
+                    ]
                     
                     wget2_process = {
                         'args': wget2_args,
@@ -1451,10 +1203,13 @@ class ImprovedWFConfigConverter:
                             'LANG': 'en_US.UTF-8',
                             'LC_ALL': 'en_US.UTF-8',
                             'LANGUAGE': 'en_US.UTF-8',
-                            'LD_LIBRARY_PATH': '/opt/lib'
+                            'LD_LIBRARY_PATH': '/opt/lib',
+                            'http_proxy':'http://127.0.0.1:9050',
+                            'https_proxy':'http://127.0.0.1:9050',
+                            'use_proxy':'on'
                         },
                         'path': '/opt/bin/wget2_noinstall',  # Using the path from your example
-                        'start_time': iteration_start_time  # All URLs in batch start at same time
+                        'start_time': iteration_start_time,  # All URLs in batch start at same time
                     }
                     
                     config['hosts'][monitor_name]['processes'].append(wget2_process)
@@ -1496,32 +1251,6 @@ class ImprovedWFConfigConverter:
         conf_dir = self.network_dir / 'conf'
         conf_dir.mkdir(exist_ok=True, parents=True)
         
-        # Extract Guard relay fingerprints from consensus data
-        self.log("Extracting Guard relay fingerprints from consensus data...")
-        guard_fingerprints = self.extract_guard_relays_from_consensus()
-        
-        # If that fails, try GML extraction
-        if len(guard_fingerprints) < 2:
-            self.log("Attempting GML-based extraction...")
-            gml_fingerprints = self.extract_relay_fingerprints_from_gml()
-            if len(gml_fingerprints) >= 2:
-                guard_fingerprints = gml_fingerprints
-        
-        # Validate fingerprints
-        guard_fingerprints = self.validate_relay_fingerprints(guard_fingerprints)
-        
-        # Format fingerprints for Tor config
-        if len(guard_fingerprints) >= 2:
-            entry_nodes = ','.join(guard_fingerprints[:2])
-            signal_nodes = ','.join(guard_fingerprints[:2])
-            self.log(f"Using EntryNodes: {entry_nodes}")
-        else:
-            # Use fallback
-            fallback = self._get_fallback_fingerprints()
-            entry_nodes = ','.join(fallback)
-            signal_nodes = ','.join(fallback)
-            self.log(f"Warning: Using fallback fingerprints: {entry_nodes}")
-        
         # Create tor.crawler.torrc with dynamic fingerprints
         tor_crawler_content = f"""# Enter any host-specific tor config options here.
 # Note that any option specified here may override a default from torrc-defaults.
@@ -1531,8 +1260,6 @@ DirPort 0
 
 SocksPort 127.0.0.1:9050 IsolateClientAddr IsolateDestAddr IsolateDestPort
 UseEntryGuards 1
-EntryNodes {entry_nodes}
-SignalNodes {signal_nodes}
 """
         
         try:
@@ -1568,7 +1295,7 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
     print("Done connect")
 
     print("Sending AUTHENTICATE")
-    s.sendall(b"AUTHENTICATE\r\n")
+    s.sendall(b"AUTHENTICATE\\r\\n")
     print("Done AUTHENTICATE")
 
     print("Receiving AUTHENTICATE response")
@@ -1576,7 +1303,7 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
     print(f"Received {data!r}")
 
     print("Sending SIGNAL NEWNYM")
-    s.sendall(b"SIGNAL NEWNYM\r\n")
+    s.sendall(b"SIGNAL NEWNYM\\r\\n")
     print("Done SIGNAL NEWNYM")
 
     print("Receiving SIGNAL NEWNYM response")
@@ -1645,6 +1372,7 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
 print('Hello zimply!')
 
 import os
+import sys
 
 # use abs path to simplify the internal href links
 root = os.getenv('ZIMROOT')
@@ -1658,13 +1386,19 @@ print(f'Found environment ZIMPORT={port}')
 
 print('Starting zimply server now!')
 
-from zimply import ZIMServer
-ZIMServer("/mnt/wikidata/wikipedia_en_top.zim",
-     index_file="/mnt/wikidata/index.idx",
-     template="/mnt/wikidata/template.html",
-     ip_address=ip,
-     port=int(port),
-     encoding="utf-8")
+try:
+    from zimply import ZIMServer
+    print('Zimply imported successfully')
+    
+    zim_path = f"{root}/wikipedia_en_top.zim"
+    print(f'Attempting to start ZIMServer with path: {zim_path}')
+    print(f'File exists: {os.path.exists(zim_path)}')
+    
+    ZIMServer(zim_path,
+         index_file=f"{root}/index.idx",
+         ip_address=ip,
+         port=int(port),
+         encoding="utf-8")
 """
         
         try:
@@ -1678,128 +1412,6 @@ ZIMServer("/mnt/wikidata/wikipedia_en_top.zim",
             self.log(f"Warning: Could not create zimserver0/zimsrv.py: {e}")
         
         return success_count
-    
-    def create_wikipedia_content(self):
-        """Create Wikipedia content based on ZIM file"""
-        # Create content directory structure
-        content_dir = Path('./wikidata')
-        content_dir.mkdir(exist_ok=True, parents=True)
-        
-        created_files = 0
-
-        # Check if ZIM file exists, create a simple template if not
-        zim_path = Path(self.zim_file_path)
-        if not zim_path.exists():
-            self.log(f"ZIM file not found at {zim_path}, creating template HTML files")
-
-        # Create template.html
-        template_content = """<!DOCTYPE html>
-<html>
-<head>
-    <title>{{TITLE}}</title>
-    <meta charset="utf-8">
-    <style>
-        body { font-family: Arial, sans-serif; margin: 40px; }
-        .content { max-width: 800px; margin: 0 auto; }
-    </style>
-</head>
-<body>
-    <div class="content">
-        {{CONTENT}}
-    </div>
-</body>
-</html>"""
-
-        try:
-            with open(content_dir / 'template.html', 'w') as f:
-                f.write(template_content)
-            created_files += 1
-        except Exception as e:
-            self.log(f"Warning: Could not create template.html: {e}")
-
-        try:
-            index_file = content_dir / 'index.idx'
-            with open(index_file, 'w') as f:
-                # Create a simple index for the articles we have
-                for i, url_info in enumerate(self.urls[:20]):
-                    f.write(f"{i},{url_info['title']},{url_info['page_path']}\n")
-            created_files += 1
-            self.log(f"Created index.idx with {len(self.urls[:20])} entries")
-        except Exception as e:
-            self.log(f"Warning: Could not create index.idx: {e}")
-            
-        # Create content files based on extracted URLs
-        for i, url_info in enumerate(self.urls[:20]):  # First 20 for testing
-            page_title = url_info.get('title', 'Unknown Page')
-            page_path = url_info['page_path'].lstrip('/')
-            if not page_path:
-                page_path = 'index.html'
-            
-            # Create realistic Wikipedia-like content
-            content_size = (i % 5) + 1
-            page_content = f"""<!DOCTYPE html>
-<html>
-<head>
-    <title>{page_title}</title>
-    <meta charset="utf-8">
-    <style>
-        body {{ font-family: Arial, sans-serif; margin: 40px; }}
-        .infobox {{ float: right; width: 300px; border: 1px solid #aaa; padding: 10px; margin: 10px; }}
-    </style>
-</head>
-<body>
-    <h1>{page_title}</h1>
-    
-    <div class="infobox">
-        <h3>Quick Facts</h3>
-        <p><strong>Topic:</strong> {page_title}</p>
-        <p><strong>Type:</strong> Wikipedia Article</p>
-        <p><strong>Size:</strong> {content_size * 1000} bytes (approx)</p>
-    </div>
-    
-    <p>This is a Wikipedia article simulation for Website Fingerprinting research on the topic of <strong>{page_title}</strong>.</p>
-    
-    {"".join([f'<h2>Section {j+1}</h2><p>Content section {j+1}. ' + 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. ' * content_size + '</p>' for j in range(content_size * 2)])}
-    
-    <h2>References</h2>
-    <ol>
-        {"".join([f'<li>Reference {j+1} for {page_title}</li>' for j in range(content_size)])}
-    </ol>
-    
-    <h2>External Links</h2>
-    <ul>
-        <li><a href="https://en.wikipedia.org/wiki/{page_path}">Official Wikipedia Article</a></li>
-        <li><a href="#related">Related Articles</a></li>
-    </ul>
-    
-    <script>
-        console.log('Page loaded: {page_title}');
-        // Simulate some JavaScript activity
-        for(let i = 0; i < {content_size * 20}; i++) {{
-            if (i % 5 === 0) console.log('Processing ' + i);
-        }}
-        
-        // Add some realistic JavaScript behavior
-        document.addEventListener('DOMContentLoaded', function() {{
-            console.log('DOM loaded for {page_title}');
-        }});
-    </script>
-</body>
-</html>"""
-            
-            try:
-                # Create file in content directory
-                safe_filename = page_path.replace('/', '_').replace(':', '_')
-                page_file = content_dir / f"{safe_filename}.html"
-                with open(page_file, 'w', encoding='utf-8') as f:
-                    f.write(page_content)
-                created_files += 1
-                
-            except Exception as e:
-                self.log(f"Warning: Could not create content file {page_path}: {e}")
-        
-        self.log(f"Created {created_files} content files in {content_dir}")
-        return created_files > 0
     
     def save_metadata(self):
         """Save conversion metadata"""
@@ -1868,7 +1480,7 @@ ZIMServer("/mnt/wikidata/wikipedia_en_top.zim",
         except Exception as e:
             self.log(f"Warning: Could not save metadata: {e}")
     
-    def convert_network(self):
+    def convert_network(self, args):
         """Perform complete network conversion following repository methodology with ZIM support"""
         self.log("Starting WF conversion with ZIM file support and dynamic relay selection")
         self.log("Adding oniontrace, zimserver, monitor hosts, and config files")
@@ -1889,6 +1501,54 @@ ZIMServer("/mnt/wikidata/wikipedia_en_top.zim",
             success_count += 1
         except Exception as e:
             self.log(f"URL save failed: {e}")
+        config_path = self.network_dir / 'shadow.config.yaml'
+        # Step 2: Create configuration files
+        self.log("Step 2/6: copying arti files...")
+        # First, copy Arti configuration files
+        try:
+            if self.verbose:
+                print("Step 1: Copying Arti configuration files...")
+            
+            config_copy_success = self.copy_arti_config_files(self.network_dir, self.verbose)
+            if not config_copy_success:
+                print("Warning: Failed to copy Arti configuration files")
+                print("You may need to copy them manually before running the simulation")
+        
+            # Step 3: Update arti.common.toml with authorities
+            else :
+                if self.verbose:
+                    print("\nStep 3: Updating arti.common.toml with authorities...")
+                
+                # Load the config again to extract authorities
+                try:
+                    with open(config_path, 'r') as f:
+                        config = yaml.safe_load(f)
+                    
+                    # Extract authorities from the config
+                    authorities = self.extract_authorities_from_config(config)
+                    if self.verbose and authorities:
+                        print(f"Found authorities in config: {', '.join(authorities)}")
+                    
+                    # Read authority information from tor.common.torrc
+                    authorities_info = self.read_authorities_from_torrc(self.network_dir, self.verbose)
+                    
+                    # Read RSA and ed25519 fingerprints from authority directories
+                    if authorities_info:
+                        authorities_info = self.read_authority_fingerprints(self.network_dir, authorities_info, self.verbose)
+                    
+                    # Update arti.common.toml with the authorities
+                    if authorities_info:
+                        arti_update_success = self.update_arti_common_toml(self.network_dir, authorities_info, self.verbose)
+                        if not arti_update_success:
+                            print("Warning: Failed to update arti.common.toml with authorities")
+                    else:
+                        if self.verbose:
+                            print("No authorities found in tor.common.torrc to add to arti.common.toml")
+                            
+                except Exception as e:
+                    print(f"Error processing authorities for arti.common.toml: {e}")
+        except Exception as e:
+                print(f"Error processing authorities for arti.common.toml: {e}")
         
         # Step 2: Create configuration files
         self.log("Step 2/6: Creating configuration files...")
@@ -1905,46 +1565,8 @@ ZIMServer("/mnt/wikidata/wikipedia_en_top.zim",
         if self.modify_shadow_config():
             success_count += 1
         
-        # Step 5: Create Wikipedia content
-        self.log("Step 5/6: Creating Wikipedia content...")
-        try:
-            if self.create_wikipedia_content():
-                success_count += 1
-        except Exception as e:
-            self.log(f"Content creation failed: {e}")
-
-        # Load the config again to extract authorities
-            try:
-                config_path = self.network_dir / 'shadow.config.yaml'
-                with open(config_path, 'r') as f:
-                    config = yaml.safe_load(f)
-                
-                # Extract authorities from the config
-                authorities = self.extract_authorities_from_config(config_path)
-                if self.verbose and authorities:
-                    print(f"Found authorities in config: {', '.join(authorities)}")
-                
-                # Read authority information from tor.common.torrc
-                authorities_info = self.read_authorities_from_torrc(self.network_dir, self.verbose)
-                
-                # Read RSA and ed25519 fingerprints from authority directories
-                if authorities_info:
-                    authorities_info = self.read_authority_fingerprints(self.network_dir, authorities_info, self.verbose)
-                
-                # Update arti.common.toml with the authorities
-                if authorities_info:
-                    arti_update_success = self.update_arti_common_toml(self.network_dir, authorities_info, self.verbose)
-                    if not arti_update_success:
-                        print("Warning: Failed to update arti.common.toml with authorities")
-                else:
-                    if self.verbose:
-                        print("No authorities found in tor.common.torrc to add to arti.common.toml")
-                        
-            except Exception as e:
-                print(f"Error processing authorities for arti.common.toml: {e}")
-        
         # Step 6: Save metadata
-        self.log("Step 6/6: Saving metadata...")
+        self.log("Step 5/5: Saving metadata...")
         try:
             self.save_metadata()
             success_count += 1
@@ -1954,7 +1576,7 @@ ZIMServer("/mnt/wikidata/wikipedia_en_top.zim",
         # Summary
         self.log(f"\nConversion completed: {success_count}/6 steps successful")
         
-        if success_count >= 4:
+        if success_count >= 3:
             self.log("Network successfully converted with ZIM file support and dynamic relay selection!")
             self.log("Changes made:")
             self.log("   • URLs extracted from ZIM file")
@@ -1997,7 +1619,7 @@ def main():
     args = parser.parse_args()
     
     converter = ImprovedWFConfigConverter(args.network_dir, args.zim_file, args.verbose)
-    success = converter.convert_network()
+    success = converter.convert_network(args)
     
     sys.exit(0 if success else 1)
 

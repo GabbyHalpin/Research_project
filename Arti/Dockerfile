@@ -123,8 +123,58 @@ RUN git clone https://github.com/shadow/oniontrace.git
 WORKDIR /opt/src/oniontrace/tools
 RUN pip3 install -r requirements.txt
 RUN pip3 install -I .
-# we also need the zimply python module for the wikipedia server
-RUN pip3 install zimply
+
+FROM base AS build-wget2
+WORKDIR /mnt
+
+# Clone wget2 directly
+RUN git clone https://gitlab.com/gnuwget/wget2.git
+WORKDIR /mnt/wget2
+RUN git checkout edfd08
+# Copy and apply patch
+COPY wget2/socks.patch ./
+RUN git config --global user.email "builder@example.com" && \
+    git config --global user.name "Docker Builder"
+RUN git am socks.patch 
+RUN apt-get update && apt-get install -y \
+  autoconf \
+  automake \
+  autogen \
+  autopoint \
+  libtool \
+  gettext \
+  gcc \
+  make \
+  rsync \
+  wget \
+  tar \
+  texinfo \
+  pkg-config \
+  flex \
+  lzip \
+  gnupg1 \
+  libfl-dev \
+  libidn2-dev \
+  libpsl-dev \
+  libgnutls28-dev \
+  libiconv-hook-dev \
+  zlib1g-dev \
+  libpcre2-dev \
+  libgpgme-dev \
+  libassuan-dev \
+  libnghttp2-dev
+RUN git clone https://github.com/coreutils/gnulib.git gnulib
+RUN git submodule init && git submodule update
+
+# Configure git safely
+RUN git config --global --add safe.directory /mnt/wget2
+RUN git config --global --add safe.directory /mnt/wget2/gnulib
+
+# Build and install
+RUN ./bootstrap
+RUN ./configure --prefix=/opt --enable-threads=posix --disable-doc --without-lzip --without-libhsts
+RUN make -j"$(nproc)"
+RUN make install
 
 
 FROM base AS build-obfs4proxy
@@ -189,6 +239,20 @@ RUN apt-get update && apt-get install -y \
   libigraph-dev \
   libprocps-dev
 
+# wget2 runtime deps
+RUN apt-get update && apt-get install -y \
+  gnupg1 \
+  libfl-dev \
+  libidn2-dev \
+  libpsl-dev \
+  libgnutls28-dev \
+  libiconv-hook-dev \
+  zlib1g-dev \
+  libpcre2-dev \
+  libgpgme-dev \
+  libassuan-dev \
+  libnghttp2-dev
+
   
 RUN echo fs.nr_open = 104857600 >> /etc/sysctl.conf
 RUN echo fs.file-max = 104857600 >> /etc/sysctl.conf
@@ -208,6 +272,7 @@ COPY --from=build-tor /opt /opt/
 COPY --from=build-oniontrace /opt /opt/
 COPY --from=build-tornettools /opt /opt/
 COPY --from=build-arti /opt /opt/
+COPY --from=build-wget2 /opt /opt/
 
 COPY --from=build-arti /root/src/arti /opt/src/arti
 # Setup run env
@@ -217,15 +282,28 @@ ENV LD_LIBRARY_PATH=/opt/lib
 
 WORKDIR /mnt
 
-# RUN wget https://collector.torproject.org/archive/relay-descriptors/consensuses/consensuses-2025-07.tar.xz
-# RUN wget https://collector.torproject.org/archive/relay-descriptors/server-descriptors/server-descriptors-2025-07.tar.xz
-# RUN wget https://metrics.torproject.org/userstats-relay-country.csv
-# RUN wget https://collector.torproject.org/archive/onionperf/onionperf-2025-07.tar.xz
-# RUN wget -O bandwidth-2025-07.csv "https://metrics.torproject.org/bandwidth.csv?start=2025-07-01&end=2025-07-31"
-# RUN tar xaf consensuses-2025-07.tar.xz
-# RUN tar xaf server-descriptors-2025-07.tar.xz
-# RUN tar xaf onionperf-2025-07.tar.xz
-# RUN git clone https://github.com/tmodel-ccs2018/tmodel-ccs2018.github.io.git
+RUN mkdir -p wikidata && \
+    cd wikidata && \
+    wget -O wikipedia_en_top.zim \
+    "https://download.kiwix.org/zim/wikipedia/wikipedia_en_100_maxi_2025-07.zim"
 
+RUN wget https://collector.torproject.org/archive/relay-descriptors/consensuses/consensuses-2025-07.tar.xz
+RUN wget https://collector.torproject.org/archive/relay-descriptors/server-descriptors/server-descriptors-2025-07.tar.xz
+RUN wget https://metrics.torproject.org/userstats-relay-country.csv
+RUN wget https://collector.torproject.org/archive/onionperf/onionperf-2025-07.tar.xz
+RUN wget -O bandwidth-2025-07.csv "https://metrics.torproject.org/bandwidth.csv?start=2025-07-01&end=2025-07-31"
+RUN tar xaf consensuses-2025-07.tar.xz
+RUN tar xaf server-descriptors-2025-07.tar.xz
+RUN tar xaf onionperf-2025-07.tar.xz
+RUN git clone https://github.com/tmodel-ccs2018/tmodel-ccs2018.github.io.git
+
+#In the simulate stage, before the final RUN pip3 install zimply
+RUN apt-get update && apt-get install -y python3-pip
+RUN /usr/bin/python3 -m pip install zimply
+RUN /usr/bin/python3 -m pip install libzim
+
+# Install in virtual environment
+ENV PATH=/opt/bin:$PATH
+RUN python3 -m pip install libzim
 
 ENTRYPOINT ["bash"]
