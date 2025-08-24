@@ -1079,33 +1079,7 @@ class ImprovedWFConfigConverter:
         # Create conf directory structure
         conf_dir = self.network_dir / 'conf'
         conf_dir.mkdir(exist_ok=True, parents=True)
-        
-        # Extract Guard relay fingerprints from consensus data
-        self.log("Extracting Guard relay fingerprints from consensus data...")
-        guard_fingerprints = self.extract_guard_relays_from_consensus()
-        
-        # If that fails, try GML extraction
-        if len(guard_fingerprints) < 2:
-            self.log("Attempting GML-based extraction...")
-            gml_fingerprints = self.extract_relay_fingerprints_from_gml()
-            if len(gml_fingerprints) >= 2:
-                guard_fingerprints = gml_fingerprints
-        
-        # Validate fingerprints
-        guard_fingerprints = self.validate_relay_fingerprints(guard_fingerprints)
-        
-        # Format fingerprints for Tor config
-        if len(guard_fingerprints) >= 2:
-            entry_nodes = ','.join(guard_fingerprints[:2])
-            signal_nodes = ','.join(guard_fingerprints[:2])
-            self.log(f"Using EntryNodes: {entry_nodes}")
-        else:
-            # Use fallback
-            fallback = self._get_fallback_fingerprints()
-            entry_nodes = ','.join(fallback)
-            signal_nodes = ','.join(fallback)
-            self.log(f"Warning: Using fallback fingerprints: {entry_nodes}")
-        
+
         # Create tor.crawler.torrc with dynamic fingerprints
         tor_crawler_content = f"""# Enter any host-specific tor config options here.
 # Note that any option specified here may override a default from torrc-defaults.
