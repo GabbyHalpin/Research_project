@@ -26,7 +26,7 @@ class ImprovedWFConfigConverter:
         self.network_dir = Path(network_dir)
         self.zim_file_path = zim_file_path or "./wikidata/wikipedia_en_top.zim"
         self.verbose = verbose
-        self.base_ip = "129.114.108.192"
+        self.base_ip = "10.0.0.1"
         self.start_port = 8000
         self.urls = self.load_and_process_urls()
         self.webpage_sets = self.create_webpage_sets()
@@ -136,6 +136,46 @@ class ImprovedWFConfigConverter:
         except Exception as e:
             self.log(f"Error parsing relay info file: {e}")
             return self._get_fallback_fingerprints()
+    
+#     def create_wikipedia_content(self):
+#         """Create Wikipedia content based on ZIM file"""
+#         # Create content directory structure
+#         content_dir = Path('./wikidata')
+#         content_dir.mkdir(exist_ok=True, parents=True)
+        
+#         created_files = 0
+#         # Check if ZIM file exists, create a simple template if not
+#         zim_path = Path(self.zim_file_path)
+#         if not zim_path.exists():
+#             self.log(f"ZIM file not found at {zim_path}, creating template HTML files")
+
+#         # Create template.html
+#         template_content = """<!DOCTYPE html>
+# <html>
+# <head>
+#     <title>{{TITLE}}</title>
+#     <meta charset="utf-8">
+#     <style>
+#         body { font-family: Arial, sans-serif; margin: 40px; }
+#         .content { max-width: 800px; margin: 0 auto; }
+#     </style>
+# </head>
+# <body>
+#     <div class="content">
+#         {{CONTENT}}
+#     </div>
+# </body>
+# </html>"""
+
+#         try:
+#             with open(content_dir / 'template.html', 'w') as f:
+#                 f.write(template_content)
+#             created_files += 1
+#         except Exception as e:
+#             self.log(f"Warning: Could not create template.html: {e}")
+
+#         self.log(f"Created {created_files} content files in {content_dir}")
+#         return created_files > 0
 
     def _get_fallback_fingerprints(self):
         """Fallback fingerprints if consensus parsing fails"""
@@ -243,7 +283,7 @@ class ImprovedWFConfigConverter:
             
             processed_count = 0
             attempts = 0
-            max_attempts = 500  # Try more attempts to get enough articles
+            max_attempts = 10000  # Try more attempts to get enough articles
             
             # First, try to get articles using random entry method
             while processed_count < 100 and attempts < max_attempts:
@@ -292,7 +332,7 @@ class ImprovedWFConfigConverter:
                     url_title = urllib.parse.quote(url_title, safe='_-.')
                     
                     port = self.start_port + processed_count
-                    full_url = f"http://{self.base_ip}:{port}/{url_title}"
+                    full_url = f"http://{self.base_ip}:{port}/C/{url_title}"
                     
                     urls.append({
                         'original_ip': self.base_ip,
@@ -311,51 +351,6 @@ class ImprovedWFConfigConverter:
                 except Exception as e:
                     continue  # Skip problematic entries
             
-            # If we still don't have enough articles, try some common Wikipedia article names
-            if processed_count < 50:
-                self.log(f"Only found {processed_count} articles via random sampling, trying common articles...")
-                
-                common_articles = [
-                    "Main_Page", "Wikipedia", "Association_football", "Biology", "Chemistry", 
-                    "Physics", "Mathematics", "Computer_science", "History", "Geography",
-                    "Literature", "Philosophy", "Psychology", "Art", "Music", "Science",
-                    "Technology", "Medicine", "Engineering", "Economics", "Politics",
-                    "Democracy", "Education", "Culture", "Language", "Earth", "Universe",
-                    "Evolution", "DNA", "Energy", "Climate_change", "Internet", "Artificial_intelligence"
-                ]
-                
-                for article_name in common_articles:
-                    if processed_count >= 100:
-                        break
-                        
-                    try:
-                        # Try to get entry by title
-                        if archive.has_entry_by_title(article_name):
-                            entry = archive.get_entry_by_title(article_name)
-                            
-                            # Skip if we already have this title
-                            if any(url['title'] == article_name for url in urls):
-                                continue
-                            
-                            url_title = urllib.parse.quote(article_name, safe='_-.')
-                            port = self.start_port + processed_count
-                            full_url = f"http://{self.base_ip}:{port}/{url_title}"
-                            
-                            urls.append({
-                                'original_ip': self.base_ip,
-                                'original_port': port,
-                                'original_url': full_url,
-                                'page_path': f'/{url_title}',
-                                'id': processed_count,
-                                'title': article_name.replace('_', ' ')
-                            })
-                            
-                            processed_count += 1
-                            
-                    except Exception as e:
-                        continue
-                
-                self.log(f"Added {processed_count - len([u for u in urls if not u['title'].replace(' ', '_') in common_articles])} common articles")
                             
         except Exception as e:
             self.log(f"Error reading ZIM file with libzim: {e}")
@@ -365,70 +360,15 @@ class ImprovedWFConfigConverter:
             
         self.log(f"Extracted {len(urls)} URLs from ZIM file")
         return urls
-    
-    def _extract_manual(self):
-        """Manual extraction by reading ZIM file structure"""
-        zim_path = Path(self.zim_file_path)
-        if not zim_path.exists():
-            self.log(f"Error: ZIM file not found at {zim_path}")
-            return []
-        
-        # Fallback: generate some common Wikipedia articles
-        self.log("Using fallback article list since ZIM libraries not available")
-        
-        common_articles = [
-            "Association_football", "Team_sport", "Biology", "Chemistry", "Physics",
-            "Mathematics", "Computer_science", "Engineering", "Medicine", "History",
-            "Geography", "Literature", "Philosophy", "Psychology", "Sociology",
-            "Economics", "Politics", "Art", "Music", "Culture",
-            "Science", "Technology", "Education", "Health", "Environment",
-            "Climate_change", "Energy", "Transportation", "Communication", "Internet",
-            "World_Wide_Web", "Artificial_intelligence", "Machine_learning", "Robotics", "Space",
-            "Astronomy", "Earth", "Solar_system", "Universe", "Evolution",
-            "DNA", "Genetics", "Ecology", "Biodiversity", "Conservation",
-            "Democracy", "Human_rights", "International_law", "United_Nations", "Peace",
-            "War", "Conflict_resolution", "Diplomacy", "Trade", "Globalization",
-            "Language", "Communication", "Writing", "Reading", "Books",
-            "Libraries", "Museums", "Archives", "Knowledge", "Information",
-            "Data", "Statistics", "Research", "Scientific_method", "Hypothesis",
-            "Theory", "Experiment", "Observation", "Analysis", "Discovery",
-            "Innovation", "Invention", "Patent", "Copyright", "Intellectual_property",
-            "Ethics", "Morality", "Justice", "Law", "Legal_system",
-            "Constitution", "Government", "Parliament", "President", "Prime_minister",
-            "Election", "Voting", "Political_party", "Campaign", "Public_policy",
-            "Social_welfare", "Healthcare", "Education_system", "Infrastructure", "Urban_planning",
-            "Rural_development", "Agriculture", "Food_security", "Water_resources", "Natural_resources",
-            "Renewable_energy", "Fossil_fuels", "Nuclear_energy", "Solar_power", "Wind_power",
-            "Hydroelectric_power", "Geothermal_energy", "Biomass", "Energy_efficiency", "Sustainability"
-        ]
-        
-        urls = []
-        for i, article in enumerate(common_articles[:100]):  # Limit to 100
-            port = self.start_port + i
-            full_url = f"http://{self.base_ip}:{port}/{article}"
             
-            urls.append({
-                'original_ip': self.base_ip,
-                'original_port': port,
-                'original_url': full_url,
-                'page_path': f'/{article}',
-                'id': i,
-                'title': article.replace('_', ' ')
-            })
-        
-        self.log(f"Generated {len(urls)} fallback URLs")
-        return urls
-        
     def load_and_process_urls(self):
         """Load URLs from ZIM file and process them"""
         self.log(f"Loading Wikipedia articles from ZIM file: {self.zim_file_path}")
         
-        #urls = self._extract_with_libzim()
-        urls = self._extract_manual()
+        urls = self._extract_with_libzim()
         
         if not urls:
             self.log("No URLs extracted, using fallback method")
-            urls = self._extract_manual()
         
         self.log(f"Loaded {len(urls)} Wikipedia pages from ZIM file")
         
@@ -844,8 +784,6 @@ class ImprovedWFConfigConverter:
         for host_name, host_config in config['hosts'].items():
             # Check if this is a perfclient host
             if any(pattern in host_name.lower() for pattern in ['markov']):
-                if self.verbose:
-                    print(f"Converting {host_name} to articlient-extra format...")
                 
                 # Preserve the original network_node_id
                 original_node_id = host_config.get('network_node_id')
@@ -866,12 +804,18 @@ class ImprovedWFConfigConverter:
                         # Arti process (replaces Tor)
                         {
                             'path': '/opt/bin/tor',
-                            'args': '--defaults-torrc torrc-defaults -f torrc',
+                            'args': '--defaults-torrc torrc-defaults -f torrc --ControlPort 9051 --CookieAuthentication 0',
                             'environment': {
                                 'OPENBLAS_NUM_THREADS': '1',
                             },
-                            'start_time': '240',
+                            'start_time': 240,
                             'expected_final_state': 'running'
+                        },
+                        {
+                            'path': '/opt/bin/oniontrace',
+                            'args': 'Mode=log TorControlPort=9051 LogLevel=info Events=BW,CIRC',
+                            'expected_final_state': 'running',
+                            'start_time': 241,
                         },
                         # tgen process for traffic generation
                         {
@@ -885,17 +829,15 @@ class ImprovedWFConfigConverter:
 
                 # Replace the host configuration
                 config['hosts'][host_name] = new_config
-                
+            
                 if self.verbose:
                     print(f"  ✓ Converted {host_name} (node_id: {original_node_id})")
                     print(f"    - Replaced Tor with Arti")
                     print(f"    - Enabled PCAP capture")
                     print(f"    - Added tgen traffic generation")
 
-                # Check if this is a perfclient host
-            if any(pattern in host_name.lower() for pattern in ['perf']):
-                if self.verbose:
-                    print(f"Converting {host_name} to articlient-extra format...")
+            # Check if this is a perfclient host
+            if any(pattern in host_name.lower() for pattern in ['perfclient']):
                 
                 # Preserve the original network_node_id
                 original_node_id = host_config.get('network_node_id')
@@ -916,12 +858,18 @@ class ImprovedWFConfigConverter:
                         # Arti process (replaces Tor)
                         {
                             'path': '/opt/bin/tor',
-                            'args': '--defaults-torrc torrc-defaults -f torrc',
+                            'args': '--defaults-torrc torrc-defaults -f torrc --ControlPort 9051 --CookieAuthentication 0',
                             'environment': {
                                 'OPENBLAS_NUM_THREADS': '1',
                             },
-                            'start_time': '240',
+                            'start_time': 240,
                             'expected_final_state': 'running'
+                        },
+                        {
+                            'path': '/opt/bin/oniontrace',
+                            'args': 'Mode=log TorControlPort=9051 LogLevel=info Events=BW,CIRC',
+                            'expected_final_state': 'running',
+                            'start_time': 241,
                         },
                         # tgen process for traffic generation
                         {
@@ -932,7 +880,7 @@ class ImprovedWFConfigConverter:
                         }
                     ]
                 }
-            
+
                 # Replace the host configuration
                 config['hosts'][host_name] = new_config
             
@@ -979,7 +927,7 @@ class ImprovedWFConfigConverter:
             config['hosts'][server_name] = {
                 'bandwidth_down': '200 megabit',
                 'bandwidth_up': '200 megabit',
-                'ip_addr': self.base_ip,
+                'ip_addr': '10.0.0.1',
                 'network_node_id': node_id,
                 'processes': []
             }
@@ -988,29 +936,30 @@ class ImprovedWFConfigConverter:
             unique_ports = set()
             for url_info in self.webpage_sets['W_alpha']:  # Changed from self.urls[:10] to W_alpha
                 port = url_info['original_port']
-                if port not in unique_ports and len(unique_ports) < 1:
+                if port not in unique_ports:
                     unique_ports.add(port)
 
                     # Add zimsrv process for this port
                     zimprocess = {
-                        'args': '-m zimsrv.py',
+                        'args': 'zimsrv.py',
                         'environment': {
-                            'ZIMROOT': './wikidata',
-                            'ZIMIP': '129.114.108.192',
+                            'ZIMROOT': '/mnt/wikidata',
+                            'ZIMIP': '10.0.0.1',
                             'ZIMPORT': str(port),
                             'LANG': 'en_US.UTF-8',
                             'LC_ALL': 'en_US.UTF-8',
                             'PYTHONPATH': '/usr/local/lib/python3.10/dist-packages'
                         },
                         'path': '/opt/bin/python3',
-                        'start_time': '3s'
+                        'start_time': '3s',
+                        'expected_final_state': 'running'
                     }
 
                     config['hosts'][server_name]['processes'].append(zimprocess)
             
             self.log(f"  Added zimserver with node ID {node_id} serving {len(unique_ports)} ports")
         
-        # Add monitor hosts following repository methodology for wget2 fetching
+                # Add monitor hosts following repository methodology for wget2 fetching
         for i in range(monitor_hosts_needed):
             if node_id_index >= len(available_node_ids):
                 self.log(f"Warning: Ran out of available node IDs, only created {i} monitor hosts")
@@ -1025,49 +974,92 @@ class ImprovedWFConfigConverter:
                 'bandwidth_down': '100 megabit',
                 'bandwidth_up': '100 megabit',
                 'network_node_id': node_id,
+                'host_options': {
+                        'pcap_enabled': True,
+                        'pcap_capture_size': '65535'
+                    },
                 'processes': [
                     # Tor process - using correct path from Docker setup
                     {
                         'args': f'--Address {monitor_name} --Nickname {monitor_name} --defaults-torrc torrc-defaults -f torrc',
                         'path': '/opt/bin/tor',
-                        'start_time': 1195
+                        'start_time': 1195,
+                        'expected_final_state': 'running'
                     }
                 ]
             }
             
-            # Add wget2 processes for specific URLs (following repository methodology)
-            start_time = 1200
-            for j, url_info in enumerate(self.webpage_sets['W_alpha'][i*10:(i+1)*10]):
-                if j >= 10:  # Max 10 URLs per monitor
-                    break
-                    
-                # wget2 process following repository format
-                wget2_args = (
-                    '--page-requisites --max-threads=2 --timeout=30 --tries=1 '
-                    '--no-retry-on-http-error --no-tcp-fastopen --delete-after --quiet '
-                    '--user-agent="Mozilla/5.0 (Windows NT 10.0; rv:102.0) Gecko/20100101 Firefox/102.0" '
-                    '--no-robots --filter-urls --reject-regex=/w/|\\.js$ '
-                    '--http-proxy=127.0.0.1:9050 --https-proxy=127.0.0.1:9050 '
-                    '--no-check-hostname --no-check-certificate --no-hpkp --no-hsts '
-                    f'{url_info["original_url"]}'
-                )
-                
-                wget2_process = {
-                    'args': wget2_args,
-                    'environment': {
-                        'LANG': 'en_US.UTF-8',
-                        'LC_ALL': 'en_US.UTF-8',
-                        'LANGUAGE': 'en_US.UTF-8',
-                        'LD_LIBRARY_PATH': '/opt/lib'
-                    },
-                    'path': '/opt/bin/wget2',
-                    'start_time': start_time + j * 180  # 1 minute apart
-                }
-                
-                config['hosts'][monitor_name]['processes'].append(wget2_process)
+            # Get URLs for this monitor (max 10 per monitor)
+            monitor_urls = self.webpage_sets['W_alpha'][i*10:(i+1)*10]
+            if len(monitor_urls) > 10:
+                monitor_urls = monitor_urls[:10]
             
+            # Configuration for multiple iterations with circuit renewal
+            base_start_time = 1300
+            iterations = 3  # Number of times to repeat the URL set
+            urls_per_batch = len(monitor_urls)  # All URLs in one batch initially
+            batch_duration = urls_per_batch * 0  # All URLs start simultaneously in each batch
+            newnym_delay = 29  # Time after batch starts to run newnym
+            iteration_interval = 30  # Time between iterations
+            
+            for iteration in range(iterations):
+                iteration_start_time = base_start_time + (iteration * iteration_interval)
+                
+                # Add wget2 processes for this iteration
+                for j, url_info in enumerate(monitor_urls):
+                    wget2_args = [
+                        '--page-requisites',
+                        '--max-threads=2', 
+                        '--timeout=30',
+                        '--tries=1',
+                        '--no-retry-on-http-error',
+                        '--no-tcp-fastopen',
+                        '--delete-after',
+                        '--user-agent=Mozilla/5.0 (Windows NT 10.0; rv:102.0) Gecko/20100101 Firefox/102.0',
+                        '--no-robots',
+                        '--filter-urls',
+                        '--reject-regex=/w/|\\.js$|robots\.txt$',
+                        '--no-check-hostname',
+                        '--no-check-certificate', 
+                        '--no-hpkp',
+                        '--no-hsts',
+                        url_info["original_url"]
+                    ]
+                    
+                    wget2_process = {
+                        'args': wget2_args,
+                        'environment': {
+                            'LANG': 'en_US.UTF-8',
+                            'LC_ALL': 'en_US.UTF-8',
+                            'LANGUAGE': 'en_US.UTF-8',
+                            'LD_LIBRARY_PATH': '/opt/lib',
+                            'http_proxy':'http://127.0.0.1:9050',
+                            'https_proxy':'http://127.0.0.1:9050',
+                            'use_proxy':'on'
+                        },
+                        'path': '/opt/bin/wget2_noinstall',  # Using the path from your example
+                        'start_time': iteration_start_time,  # All URLs in batch start at same time
+                    }
+                    
+                    config['hosts'][monitor_name]['processes'].append(wget2_process)
+                
+                # Add newnym process after this iteration (except for the last iteration)
+                if iteration < iterations - 1:  # Don't add newnym after the last iteration
+                    newnym_start_time = iteration_start_time + newnym_delay
+                    
+                    newnym_process = {
+                        'args': '-m newnym',
+                        'path': '/opt/bin/python3',
+                        'start_time': newnym_start_time
+                    }
+                    
+                    config['hosts'][monitor_name]['processes'].append(newnym_process)
+    
             self.log(f"  Added monitor{i} with node ID {node_id}")
-        
+            self.log(f"    - {len(monitor_urls)} URLs per iteration")
+            self.log(f"    - {iterations} iterations with circuit renewal")
+            self.log(f"    - Total processes: {len(monitor_urls) * iterations + (iterations - 1)} (wget2 + newnym)")
+
         # Save modified config
         try:
             with open(config_path, 'w') as f:
@@ -1123,8 +1115,6 @@ DirPort 0
 
 SocksPort 127.0.0.1:9050 IsolateClientAddr IsolateDestAddr IsolateDestPort
 UseEntryGuards 1
-EntryNodes {entry_nodes}
-SignalNodes {signal_nodes}
 """
         
         try:
@@ -1160,7 +1150,7 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
     print("Done connect")
 
     print("Sending AUTHENTICATE")
-    s.sendall(b"AUTHENTICATE\r\n")
+    s.sendall(b"AUTHENTICATE\\r\\n")
     print("Done AUTHENTICATE")
 
     print("Receiving AUTHENTICATE response")
@@ -1168,7 +1158,7 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
     print(f"Received {data!r}")
 
     print("Sending SIGNAL NEWNYM")
-    s.sendall(b"SIGNAL NEWNYM\r\n")
+    s.sendall(b"SIGNAL NEWNYM\\r\\n")
     print("Done SIGNAL NEWNYM")
 
     print("Receiving SIGNAL NEWNYM response")
@@ -1251,9 +1241,8 @@ print(f'Found environment ZIMPORT={port}')
 print('Starting zimply server now!')
 
 from zimply import ZIMServer
-ZIMServer("/mnt/wikidata/wikipedia_en_top.zim",
-     index_file="/mnt/wikidata/index.idx",
-     template="/mnt/wikidata/template.html",
+ZIMServer(f"{root}/wikipedia_en_top.zim",
+     index_file=f"{root}/index.idx",
      ip_address=ip,
      port=int(port),
      encoding="utf-8")
@@ -1270,128 +1259,7 @@ ZIMServer("/mnt/wikidata/wikipedia_en_top.zim",
             self.log(f"Warning: Could not create zimserver0/zimsrv.py: {e}")
         
         return success_count
-    
-    def create_wikipedia_content(self):
-        """Create Wikipedia content based on ZIM file"""
-        # Create content directory structure
-        content_dir = Path('./wikidata')
-        content_dir.mkdir(exist_ok=True, parents=True)
-        
-        created_files = 0
 
-        # Check if ZIM file exists, create a simple template if not
-        zim_path = Path(self.zim_file_path)
-        if not zim_path.exists():
-            self.log(f"ZIM file not found at {zim_path}, creating template HTML files")
-
-        # Create template.html
-        template_content = """<!DOCTYPE html>
-<html>
-<head>
-    <title>{{TITLE}}</title>
-    <meta charset="utf-8">
-    <style>
-        body { font-family: Arial, sans-serif; margin: 40px; }
-        .content { max-width: 800px; margin: 0 auto; }
-    </style>
-</head>
-<body>
-    <div class="content">
-        {{CONTENT}}
-    </div>
-</body>
-</html>"""
-
-        try:
-            with open(content_dir / 'template.html', 'w') as f:
-                f.write(template_content)
-            created_files += 1
-        except Exception as e:
-            self.log(f"Warning: Could not create template.html: {e}")
-
-        try:
-            index_file = content_dir / 'index.idx'
-            with open(index_file, 'w') as f:
-                # Create a simple index for the articles we have
-                for i, url_info in enumerate(self.urls[:20]):
-                    f.write(f"{i},{url_info['title']},{url_info['page_path']}\n")
-            created_files += 1
-            self.log(f"Created index.idx with {len(self.urls[:20])} entries")
-        except Exception as e:
-            self.log(f"Warning: Could not create index.idx: {e}")
-            
-        # Create content files based on extracted URLs
-        for i, url_info in enumerate(self.urls[:20]):  # First 20 for testing
-            page_title = url_info.get('title', 'Unknown Page')
-            page_path = url_info['page_path'].lstrip('/')
-            if not page_path:
-                page_path = 'index.html'
-            
-            # Create realistic Wikipedia-like content
-            content_size = (i % 5) + 1
-            page_content = f"""<!DOCTYPE html>
-<html>
-<head>
-    <title>{page_title}</title>
-    <meta charset="utf-8">
-    <style>
-        body {{ font-family: Arial, sans-serif; margin: 40px; }}
-        .infobox {{ float: right; width: 300px; border: 1px solid #aaa; padding: 10px; margin: 10px; }}
-    </style>
-</head>
-<body>
-    <h1>{page_title}</h1>
-    
-    <div class="infobox">
-        <h3>Quick Facts</h3>
-        <p><strong>Topic:</strong> {page_title}</p>
-        <p><strong>Type:</strong> Wikipedia Article</p>
-        <p><strong>Size:</strong> {content_size * 1000} bytes (approx)</p>
-    </div>
-    
-    <p>This is a Wikipedia article simulation for Website Fingerprinting research on the topic of <strong>{page_title}</strong>.</p>
-    
-    {"".join([f'<h2>Section {j+1}</h2><p>Content section {j+1}. ' + 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. ' * content_size + '</p>' for j in range(content_size * 2)])}
-    
-    <h2>References</h2>
-    <ol>
-        {"".join([f'<li>Reference {j+1} for {page_title}</li>' for j in range(content_size)])}
-    </ol>
-    
-    <h2>External Links</h2>
-    <ul>
-        <li><a href="https://en.wikipedia.org/wiki/{page_path}">Official Wikipedia Article</a></li>
-        <li><a href="#related">Related Articles</a></li>
-    </ul>
-    
-    <script>
-        console.log('Page loaded: {page_title}');
-        // Simulate some JavaScript activity
-        for(let i = 0; i < {content_size * 20}; i++) {{
-            if (i % 5 === 0) console.log('Processing ' + i);
-        }}
-        
-        // Add some realistic JavaScript behavior
-        document.addEventListener('DOMContentLoaded', function() {{
-            console.log('DOM loaded for {page_title}');
-        }});
-    </script>
-</body>
-</html>"""
-            
-            try:
-                # Create file in content directory
-                safe_filename = page_path.replace('/', '_').replace(':', '_')
-                page_file = content_dir / f"{safe_filename}.html"
-                with open(page_file, 'w', encoding='utf-8') as f:
-                    f.write(page_content)
-                created_files += 1
-                
-            except Exception as e:
-                self.log(f"Warning: Could not create content file {page_path}: {e}")
-        
-        self.log(f"Created {created_files} content files in {content_dir}")
-        return created_files > 0
     
     def save_metadata(self):
         """Save conversion metadata"""
@@ -1496,14 +1364,14 @@ ZIMServer("/mnt/wikidata/wikipedia_en_top.zim",
         self.log("Step 4/6: Modifying Shadow configuration...")
         if self.modify_shadow_config():
             success_count += 1
-        
-        # Step 5: Create Wikipedia content
-        self.log("Step 5/6: Creating Wikipedia content...")
-        try:
-            if self.create_wikipedia_content():
-                success_count += 1
-        except Exception as e:
-            self.log(f"Content creation failed: {e}")
+
+        # # Step 5: Create Wikipedia content
+        # self.log("Step 5/6: Creating Wikipedia content...")
+        # try:
+        #     if self.create_wikipedia_content():
+        #         success_count += 1
+        # except Exception as e:
+        #     self.log(f"Content creation failed: {e}")
         
         # Step 6: Save metadata
         self.log("Step 6/6: Saving metadata...")

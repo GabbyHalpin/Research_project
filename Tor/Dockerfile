@@ -213,7 +213,6 @@ RUN apt-get update && apt-get install -y \
   libgpgme-dev \
   libassuan-dev \
   libnghttp2-dev
-
   
 RUN echo fs.nr_open = 104857600 >> /etc/sysctl.conf
 RUN echo fs.file-max = 104857600 >> /etc/sysctl.conf
@@ -253,5 +252,9 @@ RUN git clone https://github.com/tmodel-ccs2018/tmodel-ccs2018.github.io.git
 # In the simulate stage, before the final RUN pip3 install zimply
 RUN apt-get update && apt-get install -y python3-pip
 RUN /usr/bin/python3 -m pip install zimply
+RUN /usr/bin/python3 -m pip install libzim
 
+# Install in virtual environment
+ENV PATH=/opt/bin:$PATH
+RUN python3 -m pip install libzim
 ENTRYPOINT ["bash"]
