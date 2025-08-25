@@ -575,115 +575,6 @@ class ImprovedWFConfigConverter:
         
         # Initialize counters outside the loop
         modified_hosts = []  # List to store modified host names
-        total_oniontrace_removed = 0
-
-        for host_name, host_config in config['hosts'].items():
-            # Check if this is a perfclient host
-            if any(pattern in host_name.lower() for pattern in ['markov']):
-                
-                # Preserve the original network_node_id
-                original_node_id = host_config.get('network_node_id')
-                if original_node_id is None:
-                    print(f"Warning: No network_node_id found for {host_name}, skipping...")
-                    continue
-                
-                # Create new articlient-extra configuration
-                new_config = {
-                    'network_node_id': original_node_id,
-                    'bandwidth_up': '1000000 kilobit',
-                    'bandwidth_down': '1000000 kilobit',
-                    'host_options': {
-                        'pcap_enabled': True,
-                        'pcap_capture_size': '65535'
-                    },
-                    'processes': [
-                        {
-                            'path': '/opt/bin/tor',
-                            'args': '--defaults-torrc torrc-defaults -f torrc --ControlPort 9051 --CookieAuthentication 0',
-                            'environment': {
-                                'OPENBLAS_NUM_THREADS': '1',
-                            },
-                            'start_time': 240,
-                            'expected_final_state': 'running'
-                        },
-                        {
-                            'path': '/opt/bin/oniontrace',
-                            'args': 'Mode=log TorControlPort=9051 LogLevel=info Events=BW,CIRC',
-                            'expected_final_state': 'running',
-                            'start_time': 241,
-                        },
-                        # tgen process for traffic generation
-                        {
-                            'path': '/opt/bin/tgen',
-                            'args': 'tgenrc.graphml',
-                            'start_time': 300,
-                            'expected_final_state': 'running'
-                        }
-                    ]
-                }
-
-                # Replace the host configuration
-                config['hosts'][host_name] = new_config
-            
-                if self.verbose:
-                    print(f"  ✓ Converted {host_name} (node_id: {original_node_id})")
-                    print(f"    - Replaced Tor with Arti")
-                    print(f"    - Enabled PCAP capture")
-                    print(f"    - Added tgen traffic generation")
-
-            # Check if this is a perfclient host
-            if any(pattern in host_name.lower() for pattern in ['perfclient']):
-                
-                # Preserve the original network_node_id
-                original_node_id = host_config.get('network_node_id')
-                if original_node_id is None:
-                    print(f"Warning: No network_node_id found for {host_name}, skipping...")
-                    continue
-                
-                # Create new articlient-extra configuration
-                new_config = {
-                    'network_node_id': original_node_id,
-                    'bandwidth_up': '1000000 kilobit',
-                    'bandwidth_down': '1000000 kilobit',
-                    'host_options': {
-                        'pcap_enabled': True,
-                        'pcap_capture_size': '65535'
-                    },
-                    'processes': [
-                        # Arti process (replaces Tor)
-                        {
-                            'path': '/opt/bin/tor',
-                            'args': '--defaults-torrc torrc-defaults -f torrc --ControlPort 9051 --CookieAuthentication 0',
-                            'environment': {
-                                'OPENBLAS_NUM_THREADS': '1',
-                            },
-                            'start_time': 240,
-                            'expected_final_state': 'running'
-                        },
-                        {
-                            'path': '/opt/bin/oniontrace',
-                            'args': 'Mode=log TorControlPort=9051 LogLevel=info Events=BW,CIRC',
-                            'expected_final_state': 'running',
-                            'start_time': 241,
-                        },
-                        # tgen process for traffic generation
-                        {
-                            'path': '/opt/bin/tgen',
-                            'args': '../../../conf/tgen-perf-exit.tgenrc.graphml',
-                            'start_time': 300,
-                            'expected_final_state': 'running'
-                        }
-                    ]
-                }
-
-                # Replace the host configuration
-                config['hosts'][host_name] = new_config
-            
-                if self.verbose:
-                    print(f"  ✓ Converted {host_name} (node_id: {original_node_id})")
-                    print(f"    - Replaced Tor with Arti")
-                    print(f"    - Enabled PCAP capture")
-                    print(f"    - Added tgen traffic generation")
         
         # Calculate how many new hosts we need
         total_new_hosts_needed = 0  # zimserver
@@ -785,13 +676,13 @@ class ImprovedWFConfigConverter:
             }
             
             # Get URLs for this monitor (max 10 per monitor)
-            monitor_urls = self.webpage_sets['W_alpha'][i*10:(i+1)*10]
-            if len(monitor_urls) > 10:
-                monitor_urls = monitor_urls[:10]
+            monitor_urls = self.webpage_sets['W_alpha'][i*27:(i+1)*27]
+            if len(monitor_urls) > 27:
+                monitor_urls = monitor_urls[:27]
             
             # Configuration for multiple iterations with circuit renewal
             base_start_time = 1300
-            iterations = 3  # Number of times to repeat the URL set
+            iterations = 30  # Number of times to repeat the URL set
             urls_per_batch = len(monitor_urls)  # All URLs in one batch initially
             batch_duration = urls_per_batch * 0  # All URLs start simultaneously in each batch
             newnym_delay = 29  # Time after batch starts to run newnym
@@ -803,6 +694,10 @@ class ImprovedWFConfigConverter:
                 # Add wget2 processes for this iteration
                 for j, url_info in enumerate(monitor_urls):
                     wget2_args = [
+                        '--http-proxy=127.0.0.1:9050',
+                        '--https-proxy=127.0.0.1:9050',
+                        '--verbose',
+                        '--debug',
                         '--page-requisites',
                         '--max-threads=2', 
                         '--timeout=30',
