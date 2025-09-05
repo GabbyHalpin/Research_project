@@ -1,11 +1,10 @@
 #!/usr/bin/env python3
 """
-Single Simulation Shadow WF Processor with mergecap chronological correlation
+Single Simulation Shadow WF Processor chronological and port correlation
 
-This script processes one simulation at a time using mergecap to chronologically
+This script processes one simulation at a time to chronologically
 merge lo.pcap and eth0.pcap for accurate request-traffic correlation.
 
-Author: Claude
 Date: 2025
 """
 
@@ -48,21 +47,22 @@ class TrafficSequence(NamedTuple):
     """Structure to hold extracted traffic sequence"""
     url: str
     sequence: List[int]
+    start_time: float
+    end_time: float
+    monitor: str
 
 class SingleSimulationProcessor:
-    def __init__(self, sequence_length: int = 5000, max_workers: int = None, use_mergecap: bool = True, reference_labels_file: str = None):
+    def __init__(self, sequence_length: int = 5000, max_workers: int = None, reference_labels_file: str = None):
         """
         Initialize the single simulation processor
         
         Args:
             sequence_length: Fixed length for packet sequences (default: 5000)
             max_workers: Number of parallel workers (default: min(4, CPU count))
-            use_mergecap: Whether to use mergecap for chronological correlation
             reference_labels_file: Path to existing labels file for consistent labeling
         """
         self.sequence_length = sequence_length
         self.max_workers = min(max_workers or 4, mp.cpu_count())
-        self.use_mergecap = use_mergecap
         self.reference_labels_file = reference_labels_file
         
         # Initialize label mappings
@@ -201,49 +201,6 @@ class SingleSimulationProcessor:
             
         return False
     
-    def _merge_pcap_files(self, lo_pcap_file: Path, eth0_pcap_file: Path) -> Optional[Path]:
-        """Merge lo.pcap and eth0.pcap chronologically using mergecap"""
-        try:
-            # Check if mergecap is available
-            result = subprocess.run(['mergecap', '--version'], 
-                                  capture_output=True, text=True, timeout=10)
-            if result.returncode != 0:
-                logger.error("mergecap not available")
-                return None
-                
-        except (FileNotFoundError, subprocess.TimeoutExpired):
-            logger.error("mergecap not found in PATH")
-            return None
-        
-        try:
-            # Create temporary file for merged output
-            merged_file = tempfile.NamedTemporaryFile(suffix='.pcap', delete=False)
-            merged_path = Path(merged_file.name)
-            merged_file.close()
-            
-            # Use mergecap to merge files chronologically
-            cmd = [
-                'mergecap',
-                '-w', str(merged_path),
-                str(lo_pcap_file),
-                str(eth0_pcap_file)
-            ]
-            
-            result = subprocess.run(cmd, capture_output=True, text=True, timeout=300)
-            
-            if result.returncode == 0:
-                logger.debug(f"Successfully merged {lo_pcap_file.name} and {eth0_pcap_file.name}")
-                return merged_path
-            else:
-                logger.error(f"mergecap failed: {result.stderr}")
-                if merged_path.exists():
-                    merged_path.unlink()
-                return None
-                
-        except Exception as e:
-            logger.error(f"Error running mergecap: {e}")
-            return None
-    
     def process_merged_pcap(self, merged_pcap_file: Path, monitor_name: str) -> List[TrafficSequence]:
         """Process chronologically merged pcap file"""
         logger.info(f"Processing merged pcap for {monitor_name}")
@@ -254,34 +211,33 @@ class SingleSimulationProcessor:
         
         traffic_sequences = []
         current_main_page = None
-        current_sequence = []
+        page_start_time = None
         packet_count = 0
         http_request_count = 0
-        url_port = {}
+        all_sequences = {}
         port_url={}
-        
+
         try:
             with PcapReader(str(merged_pcap_file)) as pcap_reader:
                 prev_seq = 0
                 prev_ack = 0
                 prev_win = 0
                 prev_len = 0
-                prev_pack_ip = 0
+
                 for packet in pcap_reader:
                     packet_count += 1
                     
                     if packet_count % 10000 == 0:
                         logger.debug(f"Processed {packet_count} merged packets...")
-                                        
+                    
+                    packet_time = float(packet.time)
+                    
                     # Check for HTTP requests (from lo.pcap - loopback traffic)
-                    if (IP in packet and packet[IP].src == '127.0.0.1' and 
-                        TCP in packet and Raw in packet) and packet[TCP].len > 40:
-                        
+                    if (IP in packet and TCP in packet and Raw in packet and packet[IP].len > 40):
                         try:
                             payload = packet[Raw].load.decode('utf-8', errors='ignore')
-                            
-                            if packet[TCP].seq!=prev_seq and prev_ack!=packet[TCP].ack and prev_win!=packet[TCP].window_size_value and prev_len!=packet[TCP]:
-                                if payload.startswith('GET ') and packet[TCP].srcport != 9050:
+                            if packet[TCP].seq!=prev_seq or prev_ack!=packet[TCP].ack or prev_win!=packet[TCP].window or (prev_len!=len(packet[TCP].payload)):
+                                if payload.startswith('GET ') and packet[TCP].dport == 9050:
                                     url_info = self._extract_url_from_http(payload)
                                     
                                     if url_info:
@@ -290,92 +246,73 @@ class SingleSimulationProcessor:
                                         
                                         if is_main_page:
                                             # Save previous sequence if exists
-                                            if current_main_page and current_sequence:
+                                            sport = packet[TCP].sport
+                                            temp_url = port_url.get(sport, "unknown")
+                                            temp_sequences = all_sequences.get(page_id, "None")
+                                            if (temp_url == "unknown" or temp_url != page_id) and temp_sequences != "None" and temp_sequences != []:
                                                 traffic_seq = TrafficSequence(
-                                                    url=current_main_page,
-                                                    sequence=current_sequence.copy(),
+                                                    url=page_id,
+                                                    sequence=all_sequences.get(page_id).copy(),
+                                                    start_time=page_start_time,
+                                                    end_time=packet_time,
+                                                    monitor=monitor_name
                                                 )
                                                 traffic_sequences.append(traffic_seq)
                                                 
-                                                logger.debug(f"Completed page {current_main_page}: {len(current_sequence)} packets")
+                                                logger.debug(f"Completed page {current_main_page}: {len(all_sequences.get(page_id))} packets")
                                             
                                             # Start new main page
                                             current_main_page = page_id
-                                            current_sequence = []
+                                            page_start_time = packet_time
+                                            #url_port[current_main_page] = packet[TCP].sport 
+                                            port_url[packet[TCP].sport] = page_id
+                                            all_sequences[page_id] = [1]
 
-                                            url_port[current_main_page] = packet[TCP].srcport
-                                            port_url[packet[TCP].srcport] = current_main_page
                                             
                                             logger.debug(f"Started new main page: {page_id}")
                                         
                                         else:
                                             # Resource request - should belong to current main page
-                                            if not current_main_page:
-                                                # Resource without main page - use the resource's inferred page
-                                                current_main_page = page_id
-                                                current_sequence = []
-                                                logger.debug(f"Started page from resource: {page_id}")
-                                            
-                                            logger.debug(f"Found resource for {current_main_page}: {page_id}")
+                                            if 'Referer:' in payload:
+                                                for line in payload.split('\r\n'):
+                                                    if line.lower().startswith('referer:'):
+                                                        referer = line.split(':', 1)[1].strip()
+                                                        all_sequences[referer].append(1)
+                                                        # Resource without main page - use the resource's inferred page
+                                                        current_main_page = page_id
+                                                        page_start_time = packet_time
+                                                        logger.debug(f"Started page from resource: {page_id}")
+                                                        
+                                                        logger.debug(f"Found resource for {current_main_page}: {page_id}")
 
-                                
-                                if prev_pack_ip !=1 and packet[TCP].srcport == 9050 :
-                                    temp_url = port_url[packet[TCP].dstport]
-                                    if temp_url:
-                                        traffic_seq = TrafficSequence(
-                                            url=temp_url,
-                                            sequence=current_sequence.copy(),
-                                        )
-                                        traffic_sequences.append(traffic_seq)
-                                    
-                                    logger.debug(f"Completed page {current_main_page}: {len(current_sequence)} packets")
+                                elif packet[TCP].sport == 9050:
+                                    dport = packet[TCP].dport
+                                    temp_url = port_url.get(dport, "unknown")
+                                    if temp_url != "unknown":
+                                        cells = len(packet[TCP].payload) // 512
+                                        for i in range(cells):
+                                            all_sequences[temp_url].append(-1)
 
                                 prev_seq = packet[TCP].seq
                                 prev_ack = packet[TCP].ack
-                                prev_len = packet[TCP].len
-                                prev_win = packet[TCP].window_size_value
+                                prev_len = len(packet[TCP].payload)
+                                prev_win = packet[TCP].window
 
-                            prev_pack_ip = 1
-                        
                         except (UnicodeDecodeError, AttributeError):
                             continue
-                    
-                    # Check for encrypted traffic (from eth0.pcap)
-                    elif (IP in packet and TCP in packet and 
-                          current_main_page and
-                          packet[IP].src != '127.0.0.1' and packet[IP].dst != '127.0.0.1' and packet[TCP].len > 40):
-                        
-                        src_ip = packet[IP].src
-                        dst_ip = packet[IP].dst
-
-                        
-                        # Determine packet direction
-                        direction = None
-                        if src_ip in local_ips and dst_ip not in local_ips:
-                            direction = 1  # Outgoing
-                        elif dst_ip in local_ips and src_ip not in local_ips:
-                            direction = -1  # Incoming
-                        
-                        if direction is not None:
-                            cells = packet[TCP].len % 512
-                            for  i in range(cells):
-                                current_sequence.append(direction)
-
-                        prev_pack_ip = -1
-            
-            # Handle final sequence
-            if current_main_page and current_sequence:
-                if len(current_sequence) > 10:
-                    traffic_seq = TrafficSequence(
-                        url=current_main_page,
-                        sequence=current_sequence,
+            for page, seq in all_sequences.items():
+                traffic_seq = TrafficSequence(
+                        url=page,
+                        sequence=seq.copy(),
+                        start_time=page_start_time,
+                        end_time=packet_time,
+                        monitor=monitor_name
                     )
-                    traffic_sequences.append(traffic_seq)
-                
-                logger.debug(f"Final page {current_main_page}: {len(current_sequence)} packets")
+                traffic_sequences.append(traffic_seq)
+                logger.debug(f"Final page {page}: {len(seq)} packets")
         
         except Exception as e:
-            logger.error(f"Error processing merged pcap: {e}")
+            logger.exception(f"Error processing merged pcap")
         
         logger.info(f"Found {http_request_count} HTTP requests, extracted {len(traffic_sequences)} traffic sequences")
         return traffic_sequences
@@ -413,40 +350,33 @@ class SingleSimulationProcessor:
         return local_ips
     
     def process_monitor_sequential(self, monitor_path: Path) -> List[TrafficSequence]:
-        """Process a monitor's pcap files using mergecap approach"""
+        """Process a monitor's pcap files"""
         logger.info(f"Processing monitor: {monitor_path.name}")
         
         # Find pcap files
         lo_pcap_files = list(monitor_path.glob("*lo.pcap"))
-        eth0_pcap_files = list(monitor_path.glob("*eth0.pcap"))
-        
-        if not lo_pcap_files or not eth0_pcap_files:
+
+        if not lo_pcap_files:
             logger.warning(f"Missing pcap files in {monitor_path}")
             return []
+
         
         lo_pcap_file = lo_pcap_files[0]
-        eth0_pcap_file = eth0_pcap_files[0]
-        
-        if self.use_mergecap:
-            # Try mergecap approach first
-            merged_pcap_file = self._merge_pcap_files(lo_pcap_file, eth0_pcap_file)
             
-            if merged_pcap_file:
-                try:
-                    traffic_sequences = self.process_merged_pcap(merged_pcap_file, monitor_path.name)
-                    logger.info(f"Extracted {len(traffic_sequences)} traffic sequences using mergecap")
-                    return traffic_sequences
-                
-                finally:
-                    # Clean up temporary file
-                    if merged_pcap_file.exists():
-                        merged_pcap_file.unlink()
+        if lo_pcap_file:
+            try:
+                traffic_sequences = self.process_merged_pcap(lo_pcap_file, monitor_path.name)
+                logger.info(f"Extracted {len(traffic_sequences)} traffic sequences")
+                return traffic_sequences
             
-            else:
-                logger.warning(f"Mergecap failed for {monitor_path.name}, falling back to time-based method")
+            finally:
+                # Clean up temporary file
+                # if merged_pcap_file.exists():
+                #     merged_pcap_file.unlink()
+                pass
         
         else:
-            print("ERROR")
+            logger.warning(f"Mergecap failed for {monitor_path.name}, falling back to time-based method")
     
     
     def pad_or_truncate_sequence(self, sequence: List[int]) -> List[int]:
@@ -463,10 +393,11 @@ class SingleSimulationProcessor:
             # New URL not in reference - create new label
             self.url_to_label[url] = self.current_label
             self.label_to_url[self.current_label] = url
-            logger.debug(f"Created new label {self.current_label} for URL: {url}")
+            #logger.debug(f"Created new label {self.current_label} for URL: {url}")
             self.current_label += 1
-        else:
-            logger.debug(f"Using existing label {self.url_to_label[url]} for URL: {url}")
+        # else:
+        #     pass
+            #logger.debug(f"Using existing label {self.url_to_label[url]} for URL: {url}")
         
         return self.url_to_label[url]
     
@@ -560,8 +491,7 @@ class SingleSimulationProcessor:
         with ProcessPoolExecutor(max_workers=max_monitor_workers) as executor:
             # Submit jobs
             future_to_monitor = {
-                executor.submit(process_single_monitor_worker, monitor_dir, self.sequence_length, 
-                              self.use_mergecap, self.reference_labels_file): monitor_dir
+                executor.submit(process_single_monitor_worker, monitor_dir, self.sequence_length, self.reference_labels_file): monitor_dir
                 for monitor_dir in monitor_dirs
             }
             
@@ -599,12 +529,11 @@ class SingleSimulationProcessor:
         return all_sequences
 
 
-def process_single_monitor_worker(monitor_path: Path, sequence_length: int, use_mergecap: bool, reference_labels_file: str = None) -> List[TrafficSequence]:
+def process_single_monitor_worker(monitor_path: Path, sequence_length: int, reference_labels_file: str = None) -> List[TrafficSequence]:
     """Worker function for parallel monitor processing"""
     try:
         # Create a temporary processor for this worker
-        processor = SingleSimulationProcessor(sequence_length=sequence_length, max_workers=1, 
-                                            use_mergecap=use_mergecap, 
+        processor = SingleSimulationProcessor(sequence_length=sequence_length, max_workers=1,
                                             reference_labels_file=reference_labels_file)
         return processor.process_monitor_sequential(monitor_path)
     except Exception as e:
@@ -613,7 +542,7 @@ def process_single_monitor_worker(monitor_path: Path, sequence_length: int, use_
 
 
 def main():
-    parser = argparse.ArgumentParser(description='Single Simulation Shadow WF Processor with mergecap')
+    parser = argparse.ArgumentParser(description='Single Simulation Shadow WF Processor')
     parser.add_argument('sim_path', help='Path to single simulation directory')
     parser.add_argument('output_dir', help='Output directory for processed data')
     parser.add_argument('--sequence-length', type=int, default=5000,
@@ -622,8 +551,6 @@ def main():
                         help='Maximum workers (default: 4)')
     parser.add_argument('--no-parallel-monitors', action='store_true',
                         help='Disable parallel monitor processing')
-    parser.add_argument('--no-mergecap', action='store_true',
-                        help='Disable mergecap, use time-based correlation')
     parser.add_argument('--reference-labels', type=str, default=None,
                         help='Path to reference labels file for consistent labeling')
     parser.add_argument('--verbose', action='store_true',
@@ -638,7 +565,6 @@ def main():
     processor = SingleSimulationProcessor(
         args.sequence_length,
         args.max_workers,
-        use_mergecap=not args.no_mergecap,
         reference_labels_file=args.reference_labels
     )
     
