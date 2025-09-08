@@ -5,9 +5,6 @@ Shadow Config URL Synchronizer
 This script extracts URLs from a reference shadow.config.yaml file and 
 applies them to a target simulation config to ensure consistent labeling 
 across multiple simulations.
-
-Author: Claude
-Date: 2025
 """
 
 import yaml

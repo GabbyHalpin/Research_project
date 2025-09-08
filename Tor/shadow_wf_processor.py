@@ -4,8 +4,6 @@ Single Simulation Shadow WF Processor chronological and port correlation
 
 This script processes one simulation at a time to chronologically
 merge lo.pcap and eth0.pcap for accurate request-traffic correlation.
-
-Date: 2025
 """
 
 import os
