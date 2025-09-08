@@ -1,0 +1,78 @@
+Data dimensions:
+X: Training data's shape :  (25454, 5000)
+y: Training data's shape :  (25454,)                                                                                                 X: Validation data's shape :  (5436, 5000)
+y: Validation data's shape :  (5436,)
+X: Testing data's shape :  (5506, 5000)
+y: Testing data's shape :  (5506,)
+25454 train samples
+5436 validation samples
+5506 test samples
+
+Testing accuracy: 0.31892481446266174 
+
+==================================================
+DETAILED EVALUATION USING SKLEARN
+==================================================
+173/173 ━━━━━━━━━━━━━━━━━━━━ 14s 83ms/step
+/usr/local/lib/python3.10/dist-packages/sklearn/metrics/_classification.py:1731: UndefinedMetricWarning: Precision is ill-defined and being set to 0.0 in labels with no predicted samples. Use `zero_division` parameter to control this behavior.
+  _warn_prf(average, modifier, f"{metric.capitalize()} is", result.shape[0])
+Macro-averaged Precision: 0.31504548098163687
+Macro-averaged Recall: 0.30926502913788706
+Macro-averaged F1-score: 0.2909455466463032
+
+Micro-averaged Precision: 0.3189248092989466
+Micro-averaged Recall: 0.3189248092989466
+Micro-averaged F1-score: 0.3189248092989466      
+
+  Website_0       0.20      0.22      0.21        68                                                                                   Website_1       0.66      0.28      0.39        68                                                                                   Website_2       0.17      0.16      0.17        68
+   Website_3       0.00      0.00      0.00        67                                                                                   Website_4       0.26      0.35      0.30        68
+   Website_5       0.16      0.12      0.14        68
+   Website_6       0.30      0.28      0.29        68
+   Website_7       0.29      0.15      0.20        68 
+   Website_8       0.19      0.13      0.16        68
+   Website_9       0.31      0.51      0.39        68                                                                                  Website_10       0.28      0.34      0.31        68                                                                                  Website_11       0.00      0.00      0.00        68
+  Website_12       0.31      0.26      0.29        68
+  Website_13       0.33      0.34      0.34        68
+  Website_14       0.29      0.38      0.33        68                                                                                  Website_15       0.33      0.18      0.23        68
+  Website_16       0.24      0.38      0.29        68
+  Website_17       0.26      0.37      0.31        67
+  Website_18       0.36      0.51      0.42        68                                                                                  Website_19       0.27      0.19      0.22        67
+  Website_20       0.40      0.63      0.49        68
+  Website_21       0.19      0.31      0.23        68
+  Website_22       0.00      0.00      0.00        68
+  Website_23       0.29      0.34      0.32        68                                                                                  Website_24       0.27      0.25      0.26        68                                                                                  Website_25       0.29      0.22      0.25        68
+  Website_26       0.21      0.18      0.19        68                                                                                  Website_27       1.00      0.97      0.98       135                                                                                  Website_28       0.15      0.31      0.20        68
+  Website_29       0.25      0.53      0.34        68                                                                                  Website_30       0.41      0.41      0.41        68                                                                                  Website_31       0.24      0.28      0.26        68                                                                                  Website_32       0.22      0.34      0.27        68                                                                                  Website_33       0.50      0.03      0.06        68                                                                                  Website_34       0.33      0.25      0.29        68                                                                                  Website_35       0.98      0.63      0.77        68                                                                                  Website_36       0.74      0.76      0.75        68
+  Website_37       0.51      0.63      0.56        67                                                                                  Website_38       0.15      0.13      0.14        68
+  Website_39       0.48      0.78      0.59        68
+  Website_40       0.34      0.24      0.28        68
+  Website_41       0.21      0.53      0.30        68  
+  Website_42       0.27      0.04      0.08        67
+  Website_43       0.16      0.09      0.11        68                                                                                  Website_44       0.22      0.15      0.18        60                                                                                  Website_45       0.13      0.21      0.16        68
+  Website_46       0.35      0.47      0.40        68
+  Website_47       0.17      0.21      0.19        68
+  Website_48       0.18      0.38      0.25        68                                                                                  Website_49       0.29      0.21      0.24        68
+  Website_50       0.24      0.32      0.28        68
+  Website_51       0.18      0.22      0.20        68
+  Website_52       0.00      0.00      0.00        63                                                                                  Website_53       0.21      0.19      0.20        27
+  Website_54       0.33      0.21      0.25        68
+  Website_55       0.60      0.46      0.52        68
+  Website_56       0.24      0.19      0.21        67
+  Website_57       0.22      0.16      0.18        68                                                                                  Website_58       0.44      0.29      0.35        68                                                                                  Website_59       0.72      0.34      0.46        68
+  Website_60       0.30      0.09      0.14        66                                                                                  Website_61       0.31      0.40      0.35        68                                                                                  Website_62       0.47      0.81      0.59        68
+  Website_63       0.24      0.51      0.32        68                                                                                  Website_64       0.33      0.37      0.35        68                                                                                  Website_65       0.50      0.03      0.06        67                                                                                  Website_66       0.32      0.35      0.34        68
+  Website_67       0.51      0.35      0.41        66
+  Website_68       0.44      0.16      0.24        68
+  Website_69       0.26      0.25      0.26        68                                                                                  Website_70       0.25      0.19      0.22        67
+  Website_71       0.15      0.09      0.11        68                                                                                  Website_72       0.45      0.07      0.13        68
+  Website_73       0.20      0.18      0.19        67
+  Website_74       0.29      0.60      0.40        68
+  Website_75       0.27      0.19      0.22        68                 
+  Website_78       0.32      0.35      0.34        68
+  Website_79       0.44      0.40      0.42        68                                                                                  Website_80       0.38      0.47      0.42        66   
+
+    accuracy                           0.32      5506
+   macro avg       0.32      0.31      0.29      5506
+weighted avg       0.32      0.32      0.30      5506
+
+

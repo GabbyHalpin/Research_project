@@ -682,7 +682,7 @@ class ImprovedWFConfigConverter:
             
             # Configuration for multiple iterations with circuit renewal
             base_start_time = 1300
-            iterations = 30  # Number of times to repeat the URL set
+            iterations = 150  # Number of times to repeat the URL set
             urls_per_batch = len(monitor_urls)  # All URLs in one batch initially
             batch_duration = urls_per_batch * 0  # All URLs start simultaneously in each batch
             newnym_delay = 29  # Time after batch starts to run newnym

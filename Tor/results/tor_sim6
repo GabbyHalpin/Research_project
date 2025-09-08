@@ -1,0 +1,10 @@
+Data dimensions:
+X: Training data's shape :  (51409, 5000)
+y: Training data's shape :  (51409,)
+X: Validation data's shape :  (11030, 5000)
+y: Validation data's shape :  (11030,)
+X: Testing data's shape :  (11051, 5000)
+y: Testing data's shape :  (11051,)
+51409 train samples
+11030 validation samples
+11051 test samples

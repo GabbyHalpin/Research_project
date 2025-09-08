@@ -1,0 +1,13 @@
+Data dimensions:
+X: Training data's shape :  (76347, 5000)
+y: Training data's shape :  (76347,)
+X: Validation data's shape :  (16363, 5000)
+y: Validation data's shape :  (16363,)
+X: Testing data's shape :  (16417, 5000)
+y: Testing data's shape :  (16417,)
+76347 train samples
+16363 validation samples
+16417 test samples
+Building and training DF model     
+
+

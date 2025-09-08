@@ -289,7 +289,7 @@ class SingleSimulationProcessor:
                                     dport = packet[TCP].dport
                                     temp_url = port_url.get(dport, "unknown")
                                     if temp_url != "unknown":
-                                        cells = len(packet[TCP].payload) // 512
+                                        cells = len(packet[TCP].payload) // 512 + 1
                                         for i in range(cells):
                                             all_sequences[temp_url].append(-1)
 
